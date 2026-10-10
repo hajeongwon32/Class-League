@@ -1,0 +1,668 @@
+/* ===== 색 테마 (잔디밭 축구장 느낌) ===== */
+:root {
+  --grass: #6f9d4e;        /* 상단바 잔디 초록 */
+  --grass-dark: #557a3a;   /* 진한 초록 */
+  --grass-line: #7faa5c;   /* 잔디 줄무늬 */
+  --ink: #1f2a1a;          /* 글자/테두리용 짙은 색 */
+  --cream: #faf9f0;        /* 바탕 크림색 */
+  --paper: #ffffff;        /* 카드 흰색 */
+  --yellow: #e9e36b;       /* 노란 포인트 */
+  --yellow-soft: #f5f0c0;  /* 연노랑 (안내 박스) */
+  --olive: #94a85a;        /* 연두 포인트 */
+  --red: #d8604a;          /* 빨강 포인트 */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ===== 위쪽 바 (잔디밭 + 체크무늬 질감) ===== */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background-color: var(--grass);
+  /* 잔디 세로 줄무늬 느낌 */
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--grass) 0,
+    var(--grass) 38px,
+    var(--grass-line) 38px,
+    var(--grass-line) 76px
+  );
+  color: #fff;
+  border-bottom: 4px solid var(--ink);
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nickname {
+  font-weight: 700;
+  background: var(--yellow);
+  color: var(--ink);
+  padding: 5px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+}
+
+/* ===== 가운데 영역 ===== */
+.container {
+  max-width: 460px;
+  margin: 36px auto;
+  padding: 0 18px;
+}
+
+/* ===== 탭 ===== */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.tab {
+  flex: 1;
+  padding: 13px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--yellow);
+}
+
+/* ===== 카드 (두꺼운 검은 테두리) ===== */
+.card {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 5px 5px 0 rgba(31, 42, 26, 0.9);
+}
+
+.card + .card {
+  margin-top: 20px;
+}
+
+.card h2 {
+  margin: 0 0 18px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.card h3 {
+  margin: 0 0 14px;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+/* ===== 입력칸 ===== */
+label {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+label small {
+  font-weight: 500;
+  color: #8a8f7d;
+}
+
+input {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  padding: 12px 13px;
+  border: 3px solid var(--ink);
+  border-radius: 7px;
+  font-size: 15px;
+  background: #fff;
+}
+
+input:focus {
+  outline: none;
+  background: #fffdf0;
+  box-shadow: 3px 3px 0 var(--olive);
+}
+
+/* ===== 버튼 ===== */
+.btn {
+  width: 100%;
+  padding: 13px;
+  border: 3px solid var(--ink);
+  background: var(--grass);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 4px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.btn:hover {
+  background: var(--grass-dark);
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.btn-outline {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.btn-outline:hover {
+  background: #e0d955;
+}
+
+.btn-small {
+  width: auto;
+  padding: 8px 14px;
+  font-size: 13px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.btn-small:hover {
+  background: #f0efe4;
+}
+
+/* ===== 메시지 ===== */
+.msg {
+  margin: 12px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 18px;
+}
+
+.msg.ok {
+  color: var(--grass-dark);
+}
+
+.msg.err {
+  color: var(--red);
+}
+
+/* ===== 안내 문구 ===== */
+.hint {
+  font-size: 13px;
+  color: #6b7256;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+/* ===== 리그 정보 ===== */
+.league-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.league-head h2 {
+  margin: 0;
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 800;
+  padding: 5px 11px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: var(--olive);
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ===== 리그 코드 박스 ===== */
+.code-box {
+  margin-top: 18px;
+  padding: 18px;
+  background: var(--yellow-soft);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.code-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7256;
+  margin-bottom: 6px;
+}
+
+.code-value {
+  display: block;
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+/* ===== 참가자 명단 ===== */
+.count {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--ink);
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.member-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.member-list li {
+  padding: 9px 15px;
+  background: var(--yellow-soft);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ===== 주차 안내 ===== */
+.week-info {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--grass-dark);
+}
+
+/* ===== 이번 주 경기 ===== */
+.opponent {
+  font-size: 18px;
+  margin: 4px 0 0;
+}
+
+.opponent strong {
+  font-size: 22px;
+  color: var(--grass-dark);
+}
+
+/* ===== 내 전체 일정 ===== */
+.schedule-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.schedule-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-bottom: 2px dashed #d8d6c2;
+  font-size: 15px;
+}
+
+.schedule-list li:last-child {
+  border-bottom: none;
+}
+
+.schedule-list li.now {
+  background: var(--yellow-soft);
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.schedule-list .wk {
+  min-width: 56px;
+  font-weight: 700;
+  color: #6b7256;
+}
+
+.schedule-list .bye {
+  color: #a08b3a;
+}
+
+/* ===== 순위표 ===== */
+.standings {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.standings th,
+.standings td {
+  padding: 9px 6px;
+  text-align: center;
+  border-bottom: 2px solid #e4e2d0;
+}
+
+.standings th {
+  font-size: 12px;
+  color: #6b7256;
+  border-bottom: 3px solid var(--ink);
+}
+
+.standings td:nth-child(2) {
+  text-align: left;
+  font-weight: 700;
+}
+
+.standings .pts {
+  font-weight: 900;
+  color: var(--grass-dark);
+}
+
+.standings tr.me {
+  background: var(--yellow-soft);
+}
+
+.standings tr.me td {
+  font-weight: 800;
+}
+
+/* ===== 문제 만들기 ===== */
+.q-block {
+  border: 2px dashed #c9c7b0;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.q-block:last-child {
+  margin-bottom: 0;
+}
+
+.q-title {
+  font-weight: 800;
+  color: var(--grass-dark);
+  margin-bottom: 10px;
+}
+
+textarea {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  padding: 11px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 7px;
+  font-size: 15px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+textarea:focus {
+  outline: none;
+  background: #fffdf0;
+  box-shadow: 3px 3px 0 var(--olive);
+}
+
+select {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  padding: 11px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 7px;
+  font-size: 15px;
+  background: #fff;
+}
+
+.choice-wrap {
+  margin-top: 7px;
+}
+
+.choice-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.choice-radio {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.choice-text {
+  flex: 1;
+  margin-top: 0;
+}
+
+/* ===== 과목 추가 (리그 만들기) ===== */
+.subject-label {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 14px 0 8px;
+}
+
+.subject-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.subject-row .subject-name {
+  flex: 1;
+  margin-top: 0;
+}
+
+.subject-row .subject-count {
+  width: 68px;
+  margin-top: 0;
+  text-align: center;
+}
+
+.subject-del {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 44px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  border-radius: 7px;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--red);
+}
+
+.subject-del:hover {
+  background: #ffe9e4;
+}
+
+/* ===== 랜딩 화면 ===== */
+#landingView {
+  /* 컨테이너보다 살짝 넓게 보이도록 */
+  width: calc(100vw - 36px);
+  max-width: 560px;
+  margin: 0 auto;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.landing {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 6px 6px 0 rgba(31, 42, 26, 0.9);
+  padding: 36px 26px 40px;
+  text-align: center;
+}
+
+.landing-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.landing-logo .logo-mark {
+  font-size: 26px;
+  background: var(--yellow);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-logo .logo-text {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--ink);
+}
+
+.landing-title {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  margin: 0 0 14px;
+  line-height: 1.1;
+}
+
+.landing-sub {
+  font-size: 15px;
+  color: #5f6652;
+  line-height: 1.6;
+  margin: 0 0 28px;
+}
+
+/* 두 포털 카드 */
+.portal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.portal {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 6px;
+  padding: 20px 18px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink);
+  transition: transform 0.05s;
+}
+
+.portal:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.portal:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.portal-admin {
+  background: #cfe0f3;
+}
+
+.portal-student {
+  background: var(--yellow-soft);
+}
+
+.portal-icon {
+  font-size: 30px;
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.portal-name {
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.portal-desc {
+  font-size: 12.5px;
+  color: #5f6652;
+  line-height: 1.45;
+}
+
+.portal-go {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--grass-dark);
+}
+
+/* 로그인 화면 상단: 뒤로가기 + 역할 안내 */
+.back-link {
+  margin-bottom: 14px;
+  display: inline-block;
+  width: auto;
+}
+
+.role-hint {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--grass-dark);
+  background: var(--yellow-soft);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0 0 16px;
+}
+
+/* 작은 화면: 포털 세로로 */
+@media (max-width: 460px) {
+  .landing-title {
+    font-size: 34px;
+  }
+  .portal-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "공부 축구 리그",
+  "short_name": "공부리그",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4f6fb",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    { "src": "/static/icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
