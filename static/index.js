@@ -565,15 +565,22 @@ $("addSubjectBtn").addEventListener("click", () => addSubjectRow());
 
 function addRewardRow(r) {
   const row = el("div", "reward-row");
+  // 등수는 흐린 예시 글자(placeholder) 대신 진짜 값으로 채워 둔다.
+  // 새 줄은 바로 앞 줄 다음 등수부터 시작 (예: 앞 줄이 1~3등이면 4~4등)
+  const rows = $("rewardRows").querySelectorAll(".reward-to");
+  const prevTo = rows.length ? parseInt(rows[rows.length - 1].value) || 0 : 0;
+  const start = Math.min(prevTo + 1, 60);
   const from = el("input", "reward-from");
   from.type = "number";
   from.min = 1;
-  from.placeholder = "1";
+  from.max = 60;
+  from.value = start;
   from.title = "시작 등수";
   const to = el("input", "reward-to");
   to.type = "number";
   to.min = 1;
-  to.placeholder = "3";
+  to.max = 60;
+  to.value = start;
   to.title = "끝 등수";
   const kind = el("select", "reward-kind");
   kind.append(new Option("상품", "reward"), new Option("벌칙", "penalty"));
@@ -603,16 +610,26 @@ $("leagueForm").addEventListener("submit", async (e) => {
     if (name) subjects.push({ name, count: parseInt(row.querySelector(".subject-count").value) });
   });
   const rewards = [];
-  for (const row of document.querySelectorAll("#rewardRows .reward-row")) {
+  const rewardRows = [...document.querySelectorAll("#rewardRows .reward-row")];
+  for (const [i, row] of rewardRows.entries()) {
     const text = row.querySelector(".reward-text").value.trim();
-    const fromV = row.querySelector(".reward-from").value;
-    if (!text && !fromV) continue; // 빈 줄은 무시
-    rewards.push({
-      from: parseInt(fromV),
-      to: parseInt(row.querySelector(".reward-to").value || fromV),
-      kind: row.querySelector(".reward-kind").value,
-      text,
-    });
+    const fromInput = row.querySelector(".reward-from");
+    const toInput = row.querySelector(".reward-to");
+    if (!text) continue; // 내용이 없는 줄은 무시
+    // 끝 등수를 비우면 한 등수만 (예: 1등만). 시작 등수는 꼭 있어야 한다.
+    const from = parseInt(fromInput.value);
+    const to = parseInt(toInput.value || fromInput.value);
+    if (!(from >= 1)) {
+      setMsg($("formMsg"), `상품·벌칙 ${i + 1}번째 줄("${text}")의 시작 등수를 넣어 주세요.`);
+      fromInput.focus();
+      return;
+    }
+    if (!(to >= from)) {
+      setMsg($("formMsg"), `상품·벌칙 ${i + 1}번째 줄("${text}")의 끝 등수가 시작 등수보다 작아요.`);
+      toInput.focus();
+      return;
+    }
+    rewards.push({ from, to, kind: row.querySelector(".reward-kind").value, text });
   }
   const body = {
     name: $("fName").value,

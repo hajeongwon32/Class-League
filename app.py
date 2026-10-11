@@ -597,8 +597,9 @@ def parse_league_settings(data):
     for r in raw_rewards:
         if not isinstance(r, dict):
             raise ApiError("상품·벌칙 형식이 올바르지 않아요")
-        rfrom = parse_int(r.get("from"), 1, 60, "상품·벌칙 등수는 1~60등이에요")
-        rto = parse_int(r.get("to"), 1, 60, "상품·벌칙 등수는 1~60등이에요")
+        label = (r.get("text") or "").strip()[:20]
+        rfrom = parse_int(r.get("from"), 1, 60, f"상품·벌칙 '{label}'의 등수를 1~60등으로 넣어 주세요")
+        rto = parse_int(r.get("to"), 1, 60, f"상품·벌칙 '{label}'의 등수를 1~60등으로 넣어 주세요")
         if rto < rfrom:
             raise ApiError("상품·벌칙 등수 범위가 거꾸로예요")
         kind = r.get("kind") if r.get("kind") in ("reward", "penalty") else "reward"
