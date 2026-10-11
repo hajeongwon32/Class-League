@@ -325,10 +325,22 @@
         </div>
         <p id="qInfo" class="q-info"></p>
         <p id="qHint" class="hint">과목별로 정해진 개수만큼 만들어 주세요. 마감 전까지는 몇 번이든 고칠 수 있어요.</p>
+        <div id="draftBanner" class="draft-banner hidden">
+          <p id="draftBannerText"></p>
+          <button id="discardDraftBtn" class="btn btn-small" type="button"></button>
+        </div>
       </div>
       <div id="questionForms"></div>
       <div id="saveBox" class="card">
-        <button id="saveQuestionsBtn" class="btn">문제 저장하기</button>
+        <div class="save-row">
+          <button id="saveDraftBtn" class="btn btn-small" type="button">💾 임시 저장</button>
+          <span id="draftStatus" class="draft-status"></span>
+        </div>
+        <p class="hint save-help">
+          쓰는 동안 자동으로 임시 저장돼요. 임시 저장은 경기에 쓰이지 않으니,
+          다 만들면 꼭 아래 <b>문제 저장하기</b>를 눌러 주세요.
+        </p>
+        <button id="saveQuestionsBtn" class="btn">✅ 문제 저장하기 (완성)</button>
         <p id="saveQMsg" class="msg"></p>
       </div>
     </section>

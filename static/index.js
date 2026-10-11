@@ -172,7 +172,13 @@ document.querySelectorAll(".portal").forEach((btn) => {
   });
 });
 document.querySelectorAll(".go-landing").forEach((b) => b.addEventListener("click", goLanding));
-document.querySelectorAll(".go-student").forEach((b) => b.addEventListener("click", openStudent));
+document.querySelectorAll(".go-student").forEach((b) =>
+  b.addEventListener("click", async () => {
+    // 문제 만들다 나갈 때는 쓰던 내용을 먼저 임시 저장한다
+    if (currentView === "questionsView") await flushDraft();
+    openStudent();
+  })
+);
 $("brandBtn").addEventListener("click", goLanding);
 
 // ===== 로그인 / 회원가입 =====
@@ -899,7 +905,8 @@ function renderMatchCard() {
   // 양쪽 진행 상황
   const grid = el("ul", "status-grid");
   const item = (ok, text) => grid.appendChild(el("li", ok ? "st-ok" : "st-wait", `${ok ? "✅" : "⬜"} ${text}`));
-  item(c.my_made, c.my_made ? `내 문제 ${c.total}개 완성` : `내 문제 아직 (${c.total}개 필요)`);
+  item(c.my_made, c.my_made ? `내 문제 ${c.total}개 완성`
+    : c.my_draft ? "내 문제 임시 저장만 됨" : `내 문제 아직 (${c.total}개 필요)`);
   item(c.opp_made, c.opp_made ? "상대 문제 준비됨" : "상대 문제 아직");
   item(c.i_solved, c.i_solved ? `내 풀이 제출 (${c.my_score}/${c.total} 맞힘)` : "내 풀이 아직");
   item(c.opp_solved, c.opp_solved ? "상대 풀이 제출" : "상대 풀이 아직");
@@ -909,10 +916,13 @@ function renderMatchCard() {
   const tip = el("p", "match-status");
   if (c.phase === "upcoming" || c.phase === "make") {
     $("sMakeBtn").classList.remove("hidden");
-    $("sMakeBtn").textContent = c.my_made ? "✏️ 내 문제 고치기" : "✏️ 내 문제 만들기";
+    $("sMakeBtn").textContent = c.my_made ? "✏️ 내 문제 고치기"
+      : c.my_draft ? "✏️ 이어서 만들기" : "✏️ 내 문제 만들기";
     tip.textContent = c.my_made
       ? "문제를 다 만들었어요! 마감 전까지는 고칠 수 있어요. 마감 뒤에 서로의 문제를 풀어요."
-      : "⚠️ 마감까지 문제를 안 만들면 기권패예요.";
+      : c.my_draft
+        ? "📝 임시 저장만 돼 있어요. [문제 저장하기]까지 눌러야 완성돼요. 마감까지 완성하지 않으면 기권패예요."
+        : "⚠️ 마감까지 문제를 안 만들면 기권패예요.";
   } else if (c.phase === "solve" && !c.result) {
     if (c.i_solved) {
       tip.textContent = "상대가 풀면 바로 결과가 나와요. 안 풀면 마감 때 0점 처리돼요.";
@@ -997,8 +1007,27 @@ async function openQuestions() {
     : "마감이 지나서 더 이상 고칠 수 없어요.";
   $("saveBox").classList.toggle("hidden", !data.editable);
 
+  // 임시 저장본이 있으면 (완성 저장 뒤에 고친 내용이라) 그걸로 채운다
+  const useDraft = data.editable && data.draft;
+  const banner = $("draftBanner");
+  banner.classList.toggle("hidden", !useDraft);
+  if (useDraft) {
+    $("draftBannerText").textContent = data.questions.length
+      ? `📝 ${fmtDT(data.draft.saved_at)}에 임시 저장한 내용을 불러왔어요. 완성 저장한 문제와 다를 수 있어요. 바뀐 내용을 경기에 쓰려면 [문제 저장하기]를 눌러 주세요.`
+      : `📝 ${fmtDT(data.draft.saved_at)}에 임시 저장한 내용을 불러왔어요. 아직 완성 저장 전이에요.`;
+    $("discardDraftBtn").textContent = data.questions.length
+      ? "임시 저장 버리고 완성본으로 되돌리기"
+      : "임시 저장 지우고 처음부터";
+  }
+  draftDirty = false;
+  clearTimeout(draftTimer);
+  draftEditable = data.editable;
+  $("draftStatus").textContent = useDraft ? `✓ ${fmtDT(data.draft.saved_at)} 임시 저장됨` : "";
+
   const bySubject = {};
-  for (const q of data.questions) (bySubject[q.subject] = bySubject[q.subject] || []).push(q);
+  for (const q of useDraft ? data.draft.questions : data.questions) {
+    (bySubject[q.subject] = bySubject[q.subject] || []).push(q);
+  }
 
   const forms = $("questionForms");
   forms.innerHTML = "";
@@ -1099,7 +1128,8 @@ function label(text, node) {
   return l;
 }
 
-$("saveQuestionsBtn").addEventListener("click", async () => {
+// 입력 칸의 문제들을 모은다 (완성 저장·임시 저장 공통)
+function collectQuestions() {
   const questions = [];
   $("questionForms").querySelectorAll(".q-block").forEach((box) => {
     const q = {
@@ -1120,9 +1150,86 @@ $("saveQuestionsBtn").addEventListener("click", async () => {
     }
     questions.push(q);
   });
-  const { ok, data } = await api("/questions", { questions });
-  if (ok) setMsg($("saveQMsg"), "저장했어요! 👍 마감 전까지는 다시 고칠 수 있어요.", true);
-  else setMsg($("saveQMsg"), data.error || "저장하지 못했어요.");
+  return questions;
+}
+
+$("saveQuestionsBtn").addEventListener("click", async () => {
+  clearTimeout(draftTimer);
+  const { ok, data } = await api("/questions", { questions: collectQuestions() });
+  if (ok) {
+    draftDirty = false;
+    $("draftBanner").classList.add("hidden");
+    $("draftStatus").textContent = "";
+    setMsg($("saveQMsg"), "저장했어요! 👍 경기에 이 문제가 쓰여요. 마감 전까지는 다시 고칠 수 있어요.", true);
+  } else {
+    setMsg($("saveQMsg"), (data.error || "저장하지 못했어요.") + " (쓰던 내용은 임시 저장해 둘게요)");
+    saveDraft();
+  }
+});
+
+// ===== 문제 임시 저장 =====
+// 쓰는 동안 3초 쉬면 자동으로, 버튼을 누르면 바로 서버에 임시 저장한다.
+// 임시 저장은 경기에 쓰이지 않고, [문제 저장하기]를 눌러야 완성된다.
+let draftDirty = false;     // 마지막 임시 저장 뒤에 바뀐 게 있는지
+let draftTimer = null;
+let draftEditable = false;
+let draftSaving = null;     // 저장 중인 요청 (겹치지 않게)
+
+function markDraftDirty() {
+  if (!draftEditable) return;
+  draftDirty = true;
+  $("draftStatus").textContent = "✏️ 고치는 중…";
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(saveDraft, 3000);
+}
+
+async function saveDraft() {
+  clearTimeout(draftTimer);
+  if (draftSaving) await draftSaving;
+  if (!draftEditable) return;
+  const status = $("draftStatus");
+  status.textContent = "💾 임시 저장 중…";
+  draftDirty = false;
+  draftSaving = api("/questions/draft", { questions: collectQuestions() });
+  const { ok, data } = await draftSaving;
+  draftSaving = null;
+  if (ok) {
+    status.textContent = `✓ ${fmtDT(data.saved_at)} 임시 저장됨`;
+  } else {
+    draftDirty = true;
+    status.textContent = `⚠️ 임시 저장 실패: ${data.error || "다시 시도해 주세요"}`;
+  }
+}
+
+// 바뀐 게 있으면 지금 바로 임시 저장 (화면을 떠날 때)
+async function flushDraft() {
+  if (draftDirty) await saveDraft();
+  else if (draftSaving) await draftSaving;
+}
+
+$("questionForms").addEventListener("input", markDraftDirty);
+$("questionForms").addEventListener("change", markDraftDirty);
+// 보기 추가/삭제 버튼도 내용이 바뀐 것
+$("questionForms").addEventListener("click", (e) => {
+  if (e.target.closest(".choice-tools button")) markDraftDirty();
+});
+$("saveDraftBtn").addEventListener("click", saveDraft);
+
+$("discardDraftBtn").addEventListener("click", async () => {
+  if (!confirm("임시 저장한 내용을 버릴까요?")) return;
+  clearTimeout(draftTimer);
+  draftDirty = false;
+  await api("/questions/draft/delete", {});
+  openQuestions();
+});
+
+// 저장 안 된 내용이 있는데 창을 닫으려 하면 한 번 물어본다
+window.addEventListener("beforeunload", (e) => {
+  if (currentView === "questionsView" && draftDirty) {
+    saveDraft();
+    e.preventDefault();
+    e.returnValue = "";
+  }
 });
 $("sMakeBtn").addEventListener("click", openQuestions);
 

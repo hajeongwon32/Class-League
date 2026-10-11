@@ -218,6 +218,21 @@ def init_db():
             """
         )
         add_missing_columns(db, "question", {"week": "INTEGER NOT NULL DEFAULT 0"})
+        # 문제 임시 저장: 아직 다 못 만든 문제를 주차마다 하나씩 보관 (경기에는 안 쓰임)
+        # data: 문제 목록 JSON (형식은 question과 같지만 빈칸이 있어도 됨)
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS question_draft (
+                id INTEGER PRIMARY KEY,
+                league_id INTEGER NOT NULL,
+                author_id INTEGER NOT NULL,
+                week INTEGER NOT NULL,
+                data TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                UNIQUE (league_id, author_id, week)
+            )
+            """
+        )
         # 풀이 (F8/F9): 누가 어느 경기에서 어떤 문제에 무엇을 답했는지, 맞았는지
         db.execute(
             """
@@ -1162,6 +1177,7 @@ def current_match():
         "opponent": {"id": opp_id, "nickname": opp["nickname"]},
         "total": need,
         "my_made": made_count(db, league["id"], uid, r["week"]) >= need,
+        "my_draft": get_draft(db, league["id"], uid, r["week"]) is not None,
         "opp_made": made_count(db, league["id"], opp_id, r["week"]) >= need,
         "i_solved": i_done,
         "opp_solved": bool(m["p2_done"] if is_p1 else m["p1_done"]),
@@ -1185,15 +1201,18 @@ def outcome_for(m, is_p1):
     return "win" if (r == "p1") == is_p1 else "lose"
 
 
-# ---------- 이번 주 내가 만든 문제 불러오기 (F7) ----------
-@app.get("/questions/mine")
-@login_required
-def my_questions():
-    db = get_db()
-    league = require_my_league(db)
+def my_make_round(db, league, for_edit):
+    """
+    문제 만들기용으로 이번 주차와 내 경기를 찾는다.
+    for_edit이면 지금 고칠 수 있는지(진행 중, 만들기 마감 전)도 확인한다.
+    """
     if league["status"] == "recruiting":
         raise ApiError("리그가 시작되면 문제를 만들 수 있어요", 409)
+    if for_edit and league["status"] != "running":
+        raise ApiError("진행 중인 리그에서만 문제를 만들 수 있어요", 409)
     r = focus_round(db, league["id"])
+    if for_edit and now_iso() >= r["make_deadline"]:
+        raise ApiError("이번 주 문제 만들기 마감이 지났어요", 409)
     uid = current_user.id
     m = db.execute(
         "SELECT * FROM match WHERE league_id = ? AND week = ? "
@@ -1202,6 +1221,25 @@ def my_questions():
     ).fetchone()
     if m is None or m["player2_id"] is None:
         raise ApiError("이번 주는 쉬는 주라 문제를 만들지 않아요", 409)
+    return r, m
+
+
+def get_draft(db, league_id, author_id, week):
+    return db.execute(
+        "SELECT data, updated_at FROM question_draft "
+        "WHERE league_id = ? AND author_id = ? AND week = ?",
+        (league_id, author_id, week),
+    ).fetchone()
+
+
+# ---------- 이번 주 내가 만든 문제 불러오기 (F7) ----------
+@app.get("/questions/mine")
+@login_required
+def my_questions():
+    db = get_db()
+    league = require_my_league(db)
+    r, m = my_make_round(db, league, for_edit=False)
+    uid = current_user.id
     _, opp_id = my_side(m, uid)
     opp = db.execute("SELECT nickname FROM user WHERE id = ?", (opp_id,)).fetchone()
 
@@ -1210,11 +1248,17 @@ def my_questions():
         "WHERE league_id = ? AND author_id = ? AND week = ? ORDER BY id ASC",
         (league["id"], uid, r["week"]),
     ).fetchall()
+    draft = get_draft(db, league["id"], uid, r["week"])
     return {
         "week": r["week"],
         "opponent": opp["nickname"],
         "make_deadline": r["make_deadline"],
-        "editable": now_iso() < r["make_deadline"],
+        "editable": league["status"] == "running" and now_iso() < r["make_deadline"],
+        # 임시 저장본 (완성 저장하면 지워지므로, 있으면 항상 저장된 문제보다 새것)
+        "draft": (
+            {"questions": json.loads(draft["data"]), "saved_at": draft["updated_at"]}
+            if draft else None
+        ),
         "subjects": json.loads(league["subjects"] or "[]"),
         "questions": [
             {
@@ -1236,19 +1280,8 @@ def my_questions():
 def save_questions():
     db = get_db()
     league = require_my_league(db)
-    if league["status"] != "running":
-        raise ApiError("진행 중인 리그에서만 문제를 만들 수 있어요", 409)
-    r = focus_round(db, league["id"])
-    if now_iso() >= r["make_deadline"]:
-        raise ApiError("이번 주 문제 만들기 마감이 지났어요", 409)
+    r, _ = my_make_round(db, league, for_edit=True)
     uid = current_user.id
-    m = db.execute(
-        "SELECT * FROM match WHERE league_id = ? AND week = ? "
-        "AND (player1_id = ? OR player2_id = ?)",
-        (league["id"], r["week"], uid, uid),
-    ).fetchone()
-    if m is None or m["player2_id"] is None:
-        raise ApiError("이번 주는 쉬는 주라 문제를 만들지 않아요", 409)
 
     subjects = json.loads(league["subjects"] or "[]")
     need = {s["name"]: s["count"] for s in subjects}
@@ -1316,8 +1349,71 @@ def save_questions():
             "choices, answer, explanation) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (league["id"], uid, r["week"], subject, qtype, content, choices, answer, explanation),
         )
+    # 완성본을 저장했으니 임시 저장본은 필요 없다
+    db.execute(
+        "DELETE FROM question_draft WHERE league_id = ? AND author_id = ? AND week = ?",
+        (league["id"], uid, r["week"]),
+    )
     db.commit()
     return {"ok": True, "count": len(cleaned)}
+
+
+# ---------- 문제 임시 저장: 빈칸이 있어도, 개수가 모자라도 그대로 보관 ----------
+@app.post("/questions/draft")
+@login_required
+def save_draft():
+    db = get_db()
+    league = require_my_league(db)
+    r, _ = my_make_round(db, league, for_edit=True)
+
+    subjects = {s["name"] for s in json.loads(league["subjects"] or "[]")}
+    items = (request.get_json(silent=True) or {}).get("questions", [])
+    if not isinstance(items, list) or len(items) > questions_needed(league):
+        raise ApiError("임시 저장 형식이 올바르지 않아요")
+
+    def text(v, limit):
+        return str(v if v is not None else "")[:limit]
+
+    cleaned = []
+    for q in items:
+        if not isinstance(q, dict) or q.get("subject") not in subjects:
+            raise ApiError("임시 저장 형식이 올바르지 않아요")
+        choices = q.get("choices") if isinstance(q.get("choices"), list) else []
+        cleaned.append(
+            {
+                "subject": q["subject"],
+                "qtype": q.get("qtype") if q.get("qtype") in ("mc", "sa") else "mc",
+                "content": text(q.get("content"), 1000),
+                "choices": [text(c, 200) for c in choices[:5]],
+                "answer": text(q.get("answer"), 200),
+                "explanation": text(q.get("explanation"), 1000),
+            }
+        )
+
+    now = now_iso()
+    db.execute(
+        "INSERT INTO question_draft (league_id, author_id, week, data, updated_at) "
+        "VALUES (?, ?, ?, ?, ?) ON CONFLICT (league_id, author_id, week) "
+        "DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at",
+        (league["id"], current_user.id, r["week"], json.dumps(cleaned, ensure_ascii=False), now),
+    )
+    db.commit()
+    return {"ok": True, "saved_at": now}
+
+
+# ---------- 임시 저장 버리기 ----------
+@app.post("/questions/draft/delete")
+@login_required
+def delete_draft():
+    db = get_db()
+    league = require_my_league(db)
+    r, _ = my_make_round(db, league, for_edit=False)
+    db.execute(
+        "DELETE FROM question_draft WHERE league_id = ? AND author_id = ? AND week = ?",
+        (league["id"], current_user.id, r["week"]),
+    )
+    db.commit()
+    return {"ok": True}
 
 
 def load_my_match_for_solving(db, match_id):
