@@ -37,6 +37,9 @@ const scheduleCard = document.getElementById("scheduleCard");
 const scheduleList = document.getElementById("scheduleList");
 const standingsCard = document.getElementById("standingsCard");
 const standingsBody = document.getElementById("standingsBody");
+const rewardLegend = document.getElementById("rewardLegend");
+const historyCard = document.getElementById("historyCard");
+const historyList = document.getElementById("historyList");
 const membersCard = document.getElementById("membersCard");
 const startBtn = document.getElementById("startBtn");
 const startMsg = document.getElementById("startMsg");
@@ -48,6 +51,20 @@ const backBtn = document.getElementById("backBtn");
 const questionForms = document.getElementById("questionForms");
 const saveQuestionsBtn = document.getElementById("saveQuestionsBtn");
 const saveQMsg = document.getElementById("saveQMsg");
+
+// 문제 풀기 / 결과 화면 요소
+const solveBtn = document.getElementById("solveBtn");
+const matchStatus = document.getElementById("matchStatus");
+const solveView = document.getElementById("solveView");
+const solveForms = document.getElementById("solveForms");
+const solveBackBtn = document.getElementById("solveBackBtn");
+const submitAnswersBtn = document.getElementById("submitAnswersBtn");
+const submitMsg = document.getElementById("submitMsg");
+const resultView = document.getElementById("resultView");
+const resultScore = document.getElementById("resultScore");
+const resultBackBtn = document.getElementById("resultBackBtn");
+const resultList = document.getElementById("resultList");
+let currentMatchId = null;
 
 const tabLogin = document.getElementById("tabLogin");
 const tabRegister = document.getElementById("tabRegister");
@@ -243,12 +260,18 @@ async function loadMyLeague() {
     matchCard.classList.remove("hidden");
     if (data.my_opponent.bye) {
       opponentText.textContent = "이번 주는 쉬어가는 주예요 😴 (승점 변화 없음)";
+      makeQuestionsBtn.classList.add("hidden");
+      solveBtn.classList.add("hidden");
+      matchStatus.textContent = "";
     } else {
       opponentText.innerHTML = "";
       opponentText.append("이번 주 상대: ");
       const strong = document.createElement("strong");
       strong.textContent = data.my_opponent.nickname;
       opponentText.append(strong);
+      makeQuestionsBtn.classList.remove("hidden");
+      // 경기 상태(상대 준비됨/내가 풀었는지)를 따로 불러와 풀기 버튼 처리
+      refreshMatchStatus();
     }
   } else {
     matchCard.classList.add("hidden");
@@ -283,9 +306,13 @@ async function loadMyLeague() {
   if (isRunning && Array.isArray(data.standings)) {
     standingsCard.classList.remove("hidden");
     standingsBody.innerHTML = "";
+    const rewards = (data.league && data.league.rewards) || [];
     for (const s of data.standings) {
       const tr = document.createElement("tr");
       if (s.user_id === data.my_user_id) tr.classList.add("me");
+      // 상품·벌칙 구간이면 색칠
+      const rw = rewards.find((r) => s.rank >= r.from && s.rank <= r.to);
+      if (rw) tr.classList.add(rw.kind === "penalty" ? "zone-penalty" : "zone-reward");
       const cells = [s.rank, s.nickname, s.played, s.win, s.draw, s.lose, s.points];
       cells.forEach((val, i) => {
         const td = document.createElement("td");
@@ -295,8 +322,26 @@ async function loadMyLeague() {
       });
       standingsBody.appendChild(tr);
     }
+    // 상품·벌칙 범례
+    if (rewards.length > 0) {
+      rewardLegend.classList.remove("hidden");
+      rewardLegend.innerHTML = "";
+      for (const r of rewards) {
+        const chip = document.createElement("div");
+        chip.className =
+          "legend-chip " + (r.kind === "penalty" ? "zone-penalty" : "zone-reward");
+        const range = r.from === r.to ? `${r.from}등` : `${r.from}~${r.to}등`;
+        chip.textContent = `${range}: ${r.text}`;
+        rewardLegend.appendChild(chip);
+      }
+    } else {
+      rewardLegend.classList.add("hidden");
+    }
+    // 지난 경기 기록 불러오기 (학생만)
+    if (data.my_opponent !== undefined) loadHistory();
   } else {
     standingsCard.classList.add("hidden");
+    historyCard.classList.add("hidden");
   }
 
   // ---- 리그 시작 버튼 (관리자 + 모집 중) ----
@@ -339,7 +384,19 @@ createForm.addEventListener("submit", async (e) => {
     return;
   }
 
-  const { ok, data } = await postJSON("/leagues", { name, subjects });
+  // 상품·벌칙 모으기 (선택)
+  const rewards = [];
+  document.querySelectorAll("#rewardRows .reward-row").forEach((row) => {
+    const from = parseInt(row.querySelector(".reward-from").value);
+    const to = parseInt(row.querySelector(".reward-to").value);
+    const kind = row.querySelector(".reward-kind").value;
+    const text = row.querySelector(".reward-text").value.trim();
+    if (from >= 1 && to >= from && text) {
+      rewards.push({ from, to, kind, text });
+    }
+  });
+
+  const { ok, data } = await postJSON("/leagues", { name, subjects, rewards });
   if (ok) {
     await loadMyLeague();
   } else {
@@ -379,6 +436,97 @@ function addSubjectRow(name = "", count = 3) {
 addSubjectBtn.addEventListener("click", () => addSubjectRow());
 // 처음에 과목 한 줄 기본으로 보여주기
 addSubjectRow("", 3);
+
+// ===== 상품·벌칙 추가 행 =====
+const rewardRows = document.getElementById("rewardRows");
+const addRewardBtn = document.getElementById("addRewardBtn");
+
+function addRewardRow() {
+  const row = document.createElement("div");
+  row.className = "reward-row";
+  const from = document.createElement("input");
+  from.type = "number";
+  from.className = "reward-from";
+  from.min = 1;
+  from.placeholder = "1";
+  from.title = "시작 등수";
+  const dash = document.createElement("span");
+  dash.textContent = "~";
+  const to = document.createElement("input");
+  to.type = "number";
+  to.className = "reward-to";
+  to.min = 1;
+  to.placeholder = "3";
+  to.title = "끝 등수";
+  const kind = document.createElement("select");
+  kind.className = "reward-kind";
+  kind.innerHTML = '<option value="reward">상품</option><option value="penalty">벌칙</option>';
+  const text = document.createElement("input");
+  text.type = "text";
+  text.className = "reward-text";
+  text.placeholder = "내용 (예: 치킨)";
+  text.maxLength = 100;
+  const del = document.createElement("button");
+  del.type = "button";
+  del.className = "subject-del";
+  del.textContent = "✕";
+  del.addEventListener("click", () => row.remove());
+  row.append(from, dash, to, kind, text, del);
+  rewardRows.appendChild(row);
+}
+
+addRewardBtn.addEventListener("click", addRewardRow);
+
+// ===== 지난 경기 기록 불러오기 =====
+const OUTCOME_TEXT = {
+  win: ["승", "o-win"],
+  lose: ["패", "o-lose"],
+  draw: ["무", "o-draw"],
+  pending: ["진행 중", "o-pending"],
+};
+
+async function loadHistory() {
+  const res = await fetch("/matches/history");
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !Array.isArray(data.history)) {
+    historyCard.classList.add("hidden");
+    return;
+  }
+  // 결과가 있거나 쉬는 주 하나라도 있으면 보여줌
+  const shown = data.history.filter((h) => h.bye || h.outcome !== undefined);
+  if (shown.length === 0) {
+    historyCard.classList.add("hidden");
+    return;
+  }
+  historyCard.classList.remove("hidden");
+  historyList.innerHTML = "";
+  for (const h of data.history) {
+    const li = document.createElement("li");
+    const wk = document.createElement("span");
+    wk.className = "wk";
+    wk.textContent = `${h.week}주차`;
+    li.appendChild(wk);
+    if (h.bye) {
+      const b = document.createElement("span");
+      b.className = "bye";
+      b.textContent = "😴 쉬는 주";
+      li.appendChild(b);
+    } else {
+      const opp = document.createElement("span");
+      opp.className = "h-opp";
+      opp.textContent = `vs ${h.opponent}`;
+      const score = document.createElement("span");
+      score.className = "h-score";
+      score.textContent = `${h.my_score} : ${h.opp_score}`;
+      const [label, cls] = OUTCOME_TEXT[h.outcome] || ["", ""];
+      const badge = document.createElement("span");
+      badge.className = "h-outcome " + cls;
+      badge.textContent = label;
+      li.append(opp, score, badge);
+    }
+    historyList.appendChild(li);
+  }
+}
 
 // ===== 리그 입장 =====
 joinForm.addEventListener("submit", async (e) => {
@@ -581,6 +729,182 @@ backBtn.addEventListener("click", () => {
   loadMyLeague();
 });
 saveQuestionsBtn.addEventListener("click", saveQuestions);
+
+// ===== 이번 주 경기 상태 (풀기 버튼 처리) =====
+async function refreshMatchStatus() {
+  const res = await fetch("/matches/current");
+  const data = await res.json().catch(() => ({}));
+  if (!data.has_match || data.bye) {
+    solveBtn.classList.add("hidden");
+    matchStatus.textContent = "";
+    return;
+  }
+  currentMatchId = data.match_id;
+
+  if (data.i_solved) {
+    // 이미 풀었음
+    solveBtn.classList.add("hidden");
+    let msg = `✅ 이미 풀었어요. 내 점수: ${data.my_score}/${data.total}`;
+    if (data.result) {
+      msg += " · 경기 결과가 순위표에 반영됐어요!";
+    } else {
+      msg += " · 상대가 아직 안 풀어서 결과를 기다리는 중이에요.";
+    }
+    matchStatus.textContent = msg;
+  } else if (!data.opponent_ready) {
+    // 상대가 아직 문제를 안 만듦
+    solveBtn.classList.add("hidden");
+    matchStatus.textContent = "⏳ 상대가 아직 문제를 다 만들지 않았어요. 조금 기다려 주세요.";
+  } else {
+    // 풀 수 있음
+    solveBtn.classList.remove("hidden");
+    matchStatus.textContent = "상대가 문제를 다 만들었어요! 풀어 보세요.";
+  }
+}
+
+// ===== 상대 문제 풀기 화면 열기 =====
+async function openSolve() {
+  if (!currentMatchId) return;
+  const res = await fetch(`/matches/${currentMatchId}/questions`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    alert(data.error || "문제를 불러올 수 없어요.");
+    return;
+  }
+
+  solveForms.innerHTML = "";
+  for (const q of data.questions) {
+    solveForms.appendChild(buildSolveBlock(q));
+  }
+  homeView.classList.add("hidden");
+  solveView.classList.remove("hidden");
+  submitMsg.textContent = "";
+}
+
+// 문제 한 개 푸는 블록
+function buildSolveBlock(q) {
+  const box = document.createElement("div");
+  box.className = "card q-block";
+  box.dataset.qid = q.id;
+  box.dataset.qtype = q.qtype;
+
+  const subj = document.createElement("div");
+  subj.className = "q-title";
+  subj.textContent = `[${q.subject}]`;
+  box.appendChild(subj);
+
+  const content = document.createElement("p");
+  content.className = "solve-content";
+  content.textContent = q.content; // textContent라 안전
+  box.appendChild(content);
+
+  if (q.qtype === "mc") {
+    q.choices.forEach((c, i) => {
+      const row = document.createElement("label");
+      row.className = "solve-choice";
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "solve-" + q.id;
+      radio.value = i;
+      const span = document.createElement("span");
+      span.textContent = c; // 안전
+      row.append(radio, span);
+      box.appendChild(row);
+    });
+  } else {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "solve-answer";
+    input.placeholder = "정답을 입력하세요";
+    box.appendChild(input);
+  }
+  return box;
+}
+
+// ===== 답안 제출 =====
+async function submitAnswers() {
+  submitMsg.textContent = "";
+  const answers = {};
+  const blocks = solveForms.querySelectorAll(".q-block");
+  blocks.forEach((box) => {
+    const qid = box.dataset.qid;
+    if (box.dataset.qtype === "mc") {
+      const checked = box.querySelector("input[type=radio]:checked");
+      answers[qid] = checked ? checked.value : "";
+    } else {
+      answers[qid] = box.querySelector(".solve-answer").value;
+    }
+  });
+
+  const { ok, data } = await postJSON(
+    `/matches/${currentMatchId}/submit`,
+    { answers }
+  );
+  if (ok) {
+    showResult(data);
+  } else {
+    submitMsg.className = "msg err";
+    submitMsg.textContent = data.error || "제출하지 못했어요.";
+  }
+}
+
+// ===== 채점 결과 보여주기 =====
+function showResult(data) {
+  solveView.classList.add("hidden");
+  resultView.classList.remove("hidden");
+  resultScore.textContent = `${data.total}문제 중 ${data.score}개 맞았어요!`;
+
+  resultList.innerHTML = "";
+  data.results.forEach((r, idx) => {
+    const box = document.createElement("div");
+    box.className = "card result-block " + (r.is_correct ? "correct" : "wrong");
+
+    const head = document.createElement("div");
+    head.className = "result-q";
+    head.textContent = `${idx + 1}. ${r.content}`;
+    box.appendChild(head);
+
+    const mark = document.createElement("p");
+    mark.className = "result-mark";
+    mark.textContent = r.is_correct ? "⭕ 정답" : "❌ 오답";
+    box.appendChild(mark);
+
+    // 내가 쓴 답 / 정답
+    const my = document.createElement("p");
+    my.className = "result-line";
+    if (r.qtype === "mc") {
+      const myIdx = parseInt(r.given);
+      const ansIdx = parseInt(r.correct_answer);
+      my.textContent =
+        `내 답: ${r.choices[myIdx] !== undefined ? r.choices[myIdx] : "(안 고름)"}` +
+        ` · 정답: ${r.choices[ansIdx]}`;
+    } else {
+      my.textContent = `내 답: ${r.given || "(빈칸)"} · 정답: ${r.correct_answer}`;
+    }
+    box.appendChild(my);
+
+    if (r.explanation) {
+      const ex = document.createElement("p");
+      ex.className = "result-expl";
+      ex.textContent = "해설: " + r.explanation;
+      box.appendChild(ex);
+    }
+    resultList.appendChild(box);
+  });
+}
+
+solveBtn.addEventListener("click", openSolve);
+solveBackBtn.addEventListener("click", () => {
+  solveView.classList.add("hidden");
+  homeView.classList.remove("hidden");
+  loadMyLeague();
+});
+submitAnswersBtn.addEventListener("click", submitAnswers);
+resultBackBtn.addEventListener("click", () => {
+  resultView.classList.add("hidden");
+  homeView.classList.remove("hidden");
+  loadMyLeague();
+});
 
 // ===== 로그아웃 =====
 logoutBtn.addEventListener("click", async () => {

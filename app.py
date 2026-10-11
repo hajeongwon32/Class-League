@@ -69,6 +69,7 @@ def init_db():
                 admin_id INTEGER NOT NULL,
                 status TEXT NOT NULL DEFAULT 'recruiting',
                 subjects TEXT NOT NULL DEFAULT '[]',
+                rewards TEXT NOT NULL DEFAULT '[]',
                 created_at TEXT NOT NULL
             )
             """
@@ -87,6 +88,7 @@ def init_db():
         # 대진/경기 (F6): 리그, 주차, 두 선수, 결과, 각자 점수
         # result = NULL(아직)/'p1'(선수1 승)/'p2'(선수2 승)/'draw'(무)
         # player2_id가 NULL이면 그 주는 부전승(상대가 없음)
+        # p1_done/p2_done: 그 선수가 상대 문제를 다 풀어 제출했는지(0/1)
         db.execute(
             """
             CREATE TABLE IF NOT EXISTS match (
@@ -97,7 +99,9 @@ def init_db():
                 player2_id INTEGER,
                 result TEXT,
                 p1_score INTEGER DEFAULT 0,
-                p2_score INTEGER DEFAULT 0
+                p2_score INTEGER DEFAULT 0,
+                p1_done INTEGER DEFAULT 0,
+                p2_done INTEGER DEFAULT 0
             )
             """
         )
@@ -120,6 +124,20 @@ def init_db():
             )
             """
         )
+        # 풀이 (F8/F9): 누가 어느 경기에서 어떤 문제에 무엇을 답했는지, 맞았는지
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS submission (
+                id INTEGER PRIMARY KEY,
+                match_id INTEGER NOT NULL,
+                solver_id INTEGER NOT NULL,
+                question_id INTEGER NOT NULL,
+                given TEXT NOT NULL,
+                correct INTEGER NOT NULL,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
 
         # --- 간단 마이그레이션: 예전에 만든 league 테이블에 subjects 컬럼이 없으면 추가 ---
         cols = [r[1] for r in db.execute("PRAGMA table_info(league)").fetchall()]
@@ -127,6 +145,16 @@ def init_db():
             db.execute(
                 "ALTER TABLE league ADD COLUMN subjects TEXT NOT NULL DEFAULT '[]'"
             )
+        if "rewards" not in cols:
+            db.execute(
+                "ALTER TABLE league ADD COLUMN rewards TEXT NOT NULL DEFAULT '[]'"
+            )
+        # match 테이블에 제출여부 컬럼이 없으면 추가
+        mcols = [r[1] for r in db.execute("PRAGMA table_info(match)").fetchall()]
+        if "p1_done" not in mcols:
+            db.execute("ALTER TABLE match ADD COLUMN p1_done INTEGER DEFAULT 0")
+        if "p2_done" not in mcols:
+            db.execute("ALTER TABLE match ADD COLUMN p2_done INTEGER DEFAULT 0")
 
 
 init_db()
@@ -286,6 +314,49 @@ def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
 
+def normalize_sa(text):
+    """주관식 비교용: 띄어쓰기 모두 제거 + 소문자로 (README 규칙)."""
+    return "".join((text or "").split()).lower()
+
+
+def grade_one(question_row, given):
+    """문제 하나 채점. 맞으면 True."""
+    if question_row["qtype"] == "mc":
+        try:
+            return int(given) == int(question_row["answer"])
+        except (TypeError, ValueError):
+            return False
+    else:  # 주관식
+        return normalize_sa(given) == normalize_sa(question_row["answer"])
+
+
+def finalize_match_if_ready(db, match_id):
+    """
+    두 선수가 모두 제출했으면 승·무·패를 정하고 result를 채운다 (F10).
+    한쪽만 제출했으면 아무것도 안 한다.
+    """
+    m = db.execute(
+        "SELECT player1_id, player2_id, p1_done, p2_done, p1_score, p2_score, result "
+        "FROM match WHERE id = ?",
+        (match_id,),
+    ).fetchone()
+    if m is None or m["result"] is not None:
+        return
+    if m["player2_id"] is None:
+        return  # 부전승(쉬는 주)은 결과 없음
+    if not (m["p1_done"] and m["p2_done"]):
+        return  # 아직 둘 다 안 끝남
+
+    s1, s2 = m["p1_score"], m["p2_score"]
+    if s1 > s2:
+        result = "p1"
+    elif s2 > s1:
+        result = "p2"
+    else:
+        result = "draw"
+    db.execute("UPDATE match SET result = ? WHERE id = ?", (result, match_id))
+
+
 # ---------- 로그인 설정 ----------
 class User(UserMixin):
     def __init__(self, id, username, nickname):
@@ -411,12 +482,30 @@ def create_league():
             return {"error": "과목별 문제 수는 1~20개여야 해요"}, 400
         subjects.append({"name": sname, "count": count})
 
+    # 상품·벌칙 (F4, 선택): [{"from":1,"to":1,"kind":"reward","text":"치킨"}, ...]
+    raw_rewards = data.get("rewards") or []
+    rewards = []
+    if isinstance(raw_rewards, list):
+        for r in raw_rewards:
+            if not isinstance(r, dict):
+                continue
+            try:
+                rfrom = int(r.get("from"))
+                rto = int(r.get("to"))
+            except (TypeError, ValueError):
+                continue
+            kind = r.get("kind") if r.get("kind") in ("reward", "penalty") else "reward"
+            text = (r.get("text") or "").strip()[:100]
+            if rfrom < 1 or rto < rfrom or not text:
+                continue
+            rewards.append({"from": rfrom, "to": rto, "kind": kind, "text": text})
+
     db = get_db()
     code = gen_league_code(db)
     cur = db.execute(
-        "INSERT INTO league (name, code, admin_id, status, subjects, created_at) "
-        "VALUES (?, ?, ?, 'recruiting', ?, ?)",
-        (name, code, current_user.id, json.dumps(subjects), now_iso()),
+        "INSERT INTO league (name, code, admin_id, status, subjects, rewards, created_at) "
+        "VALUES (?, ?, ?, 'recruiting', ?, ?, ?)",
+        (name, code, current_user.id, json.dumps(subjects), json.dumps(rewards), now_iso()),
     )
     db.commit()
     return {"ok": True, "league_id": cur.lastrowid, "code": code}, 201
@@ -475,7 +564,7 @@ def my_league():
         return {"in_league": False}
 
     league = db.execute(
-        "SELECT id, name, code, admin_id, status, subjects FROM league WHERE id = ?",
+        "SELECT id, name, code, admin_id, status, subjects, rewards FROM league WHERE id = ?",
         (league_id,),
     ).fetchone()
 
@@ -499,6 +588,7 @@ def my_league():
             "code": league["code"],
             "status": league["status"],
             "subjects": json.loads(league["subjects"] or "[]"),
+            "rewards": json.loads(league["rewards"] or "[]"),
         },
         "members": [{"id": m["id"], "nickname": m["nickname"]} for m in members],
     }
@@ -727,3 +817,228 @@ def save_questions():
         )
     db.commit()
     return {"ok": True, "count": len(cleaned)}
+
+
+# ---------- 이번 주 내 경기 상태 (F8/F12) ----------
+# 상대가 문제를 다 만들었는지, 내가 이미 풀었는지 알려 준다
+@app.get("/matches/current")
+@login_required
+def current_match():
+    db = get_db()
+    mem = get_my_membership(db, current_user.id)
+    if mem is None:
+        return {"error": "먼저 리그에 들어가세요"}, 403
+    league_id = mem["league_id"]
+
+    week = current_week(db, league_id)
+    m = db.execute(
+        "SELECT * FROM match WHERE league_id = ? AND week = ? "
+        "AND (player1_id = ? OR player2_id = ?)",
+        (league_id, week, current_user.id, current_user.id),
+    ).fetchone()
+    if m is None:
+        return {"has_match": False}
+
+    uid = current_user.id
+    is_p1 = m["player1_id"] == uid
+    opp_id = m["player2_id"] if is_p1 else m["player1_id"]
+
+    # 부전승(쉬는 주)
+    if opp_id is None:
+        return {"has_match": True, "bye": True, "week": week}
+
+    i_done = m["p1_done"] if is_p1 else m["p2_done"]
+    opp = db.execute("SELECT nickname FROM user WHERE id = ?", (opp_id,)).fetchone()
+
+    # 상대가 문제를 다 만들었는지 (과목별 개수 다 채웠는지)
+    league = db.execute(
+        "SELECT subjects FROM league WHERE id = ?", (league_id,)
+    ).fetchone()
+    subjects = json.loads(league["subjects"] or "[]")
+    need = sum(s["count"] for s in subjects)
+    opp_q_count = db.execute(
+        "SELECT COUNT(*) FROM question WHERE league_id = ? AND author_id = ?",
+        (league_id, opp_id),
+    ).fetchone()[0]
+    opp_ready = opp_q_count >= need and need > 0
+
+    # 내 점수(이미 풀었다면)
+    my_score = (m["p1_score"] if is_p1 else m["p2_score"]) if i_done else None
+
+    return {
+        "has_match": True,
+        "bye": False,
+        "week": week,
+        "match_id": m["id"],
+        "opponent": {"id": opp_id, "nickname": opp["nickname"]},
+        "opponent_ready": opp_ready,
+        "i_solved": bool(i_done),
+        "my_score": my_score,
+        "total": need,
+        "result": m["result"],
+    }
+
+
+# ---------- 상대 문제 불러오기 (풀기용, 정답 숨김) (F8) ----------
+@app.get("/matches/<int:match_id>/questions")
+@login_required
+def match_questions(match_id):
+    db = get_db()
+    uid = current_user.id
+    m = db.execute("SELECT * FROM match WHERE id = ?", (match_id,)).fetchone()
+    if m is None:
+        return {"error": "경기를 찾을 수 없어요"}, 404
+    if uid not in (m["player1_id"], m["player2_id"]):
+        return {"error": "내 경기가 아니에요"}, 403
+
+    is_p1 = m["player1_id"] == uid
+    opp_id = m["player2_id"] if is_p1 else m["player1_id"]
+    if opp_id is None:
+        return {"error": "쉬는 주예요"}, 400
+
+    i_done = m["p1_done"] if is_p1 else m["p2_done"]
+    if i_done:
+        return {"error": "이미 푼 경기예요"}, 409
+
+    rows = db.execute(
+        "SELECT id, subject, qtype, content, choices FROM question "
+        "WHERE league_id = ? AND author_id = ? ORDER BY id ASC",
+        (m["league_id"], opp_id),
+    ).fetchall()
+    # 정답·해설은 보내지 않는다 (채점 후에만 보여 줌)
+    questions = [
+        {
+            "id": r["id"],
+            "subject": r["subject"],
+            "qtype": r["qtype"],
+            "content": r["content"],
+            "choices": json.loads(r["choices"] or "[]"),
+        }
+        for r in rows
+    ]
+    return {"questions": questions}
+
+
+# ---------- 답안 제출 + 자동 채점 (F8/F9) ----------
+@app.post("/matches/<int:match_id>/submit")
+@login_required
+def submit_answers(match_id):
+    db = get_db()
+    uid = current_user.id
+    m = db.execute("SELECT * FROM match WHERE id = ?", (match_id,)).fetchone()
+    if m is None:
+        return {"error": "경기를 찾을 수 없어요"}, 404
+    if uid not in (m["player1_id"], m["player2_id"]):
+        return {"error": "내 경기가 아니에요"}, 403
+
+    is_p1 = m["player1_id"] == uid
+    opp_id = m["player2_id"] if is_p1 else m["player1_id"]
+    if opp_id is None:
+        return {"error": "쉬는 주예요"}, 400
+    i_done = m["p1_done"] if is_p1 else m["p2_done"]
+    if i_done:
+        return {"error": "이미 제출했어요"}, 409
+
+    data = request.json or {}
+    answers = data.get("answers") or {}  # {question_id: given}
+
+    # 상대가 낸 문제 전부 가져와 채점
+    questions = db.execute(
+        "SELECT id, qtype, content, choices, answer, explanation FROM question "
+        "WHERE league_id = ? AND author_id = ? ORDER BY id ASC",
+        (m["league_id"], opp_id),
+    ).fetchall()
+    if len(questions) == 0:
+        return {"error": "상대가 아직 문제를 안 만들었어요"}, 400
+
+    score = 0
+    results = []
+    for q in questions:
+        given = answers.get(str(q["id"]), "")
+        ok = grade_one(q, given)
+        if ok:
+            score += 1
+        db.execute(
+            "INSERT INTO submission (match_id, solver_id, question_id, given, correct, created_at) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
+            (match_id, uid, q["id"], str(given), 1 if ok else 0, now_iso()),
+        )
+        results.append(
+            {
+                "id": q["id"],
+                "qtype": q["qtype"],
+                "content": q["content"],
+                "choices": json.loads(q["choices"] or "[]"),
+                "correct_answer": q["answer"],
+                "given": given,
+                "is_correct": ok,
+                "explanation": q["explanation"],
+            }
+        )
+
+    # 내 제출 상태·점수 저장
+    if is_p1:
+        db.execute(
+            "UPDATE match SET p1_done = 1, p1_score = ? WHERE id = ?", (score, match_id)
+        )
+    else:
+        db.execute(
+            "UPDATE match SET p2_done = 1, p2_score = ? WHERE id = ?", (score, match_id)
+        )
+    # 둘 다 끝났으면 승·무·패 판정
+    finalize_match_if_ready(db, match_id)
+    db.commit()
+
+    return {"ok": True, "score": score, "total": len(questions), "results": results}
+
+
+# ---------- 지난 경기 기록 (F13) ----------
+@app.get("/matches/history")
+@login_required
+def match_history():
+    db = get_db()
+    mem = get_my_membership(db, current_user.id)
+    if mem is None:
+        return {"error": "먼저 리그에 들어가세요"}, 403
+    league_id = mem["league_id"]
+    uid = current_user.id
+
+    rows = db.execute(
+        "SELECT * FROM match WHERE league_id = ? "
+        "AND (player1_id = ? OR player2_id = ?) ORDER BY week ASC",
+        (league_id, uid, uid),
+    ).fetchall()
+
+    history = []
+    for m in rows:
+        is_p1 = m["player1_id"] == uid
+        opp_id = m["player2_id"] if is_p1 else m["player1_id"]
+        if opp_id is None:
+            history.append({"week": m["week"], "bye": True})
+            continue
+        opp = db.execute(
+            "SELECT nickname FROM user WHERE id = ?", (opp_id,)
+        ).fetchone()
+        my_score = m["p1_score"] if is_p1 else m["p2_score"]
+        opp_score = m["p2_score"] if is_p1 else m["p1_score"]
+
+        outcome = None  # win/lose/draw/pending
+        if m["result"] is None:
+            outcome = "pending"
+        elif m["result"] == "draw":
+            outcome = "draw"
+        else:
+            won = (m["result"] == "p1" and is_p1) or (m["result"] == "p2" and not is_p1)
+            outcome = "win" if won else "lose"
+
+        history.append(
+            {
+                "week": m["week"],
+                "bye": False,
+                "opponent": opp["nickname"],
+                "my_score": my_score,
+                "opp_score": opp_score,
+                "outcome": outcome,
+            }
+        )
+    return {"history": history}

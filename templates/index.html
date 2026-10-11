@@ -117,6 +117,9 @@
             <div class="subject-label">과목 (과목 이름 + 문제 수)</div>
             <div id="subjectRows"></div>
             <button type="button" id="addSubjectBtn" class="btn-small btn" style="margin-bottom:10px">+ 과목 추가</button>
+            <div class="subject-label">상품·벌칙 (선택)</div>
+            <div id="rewardRows"></div>
+            <button type="button" id="addRewardBtn" class="btn-small btn" style="margin-bottom:10px">+ 상품/벌칙 추가</button>
             <button type="submit" class="btn btn-outline">리그 만들기</button>
             <p id="createMsg" class="msg"></p>
           </form>
@@ -143,6 +146,8 @@
           <h3>⚽ 이번 주 경기</h3>
           <p id="opponentText" class="opponent"></p>
           <button id="makeQuestionsBtn" class="btn" style="margin-top:14px">✏️ 내 문제 만들기</button>
+          <button id="solveBtn" class="btn btn-outline hidden" style="margin-top:10px">🎯 상대 문제 풀기</button>
+          <p id="matchStatus" class="match-status"></p>
         </div>
 
         <!-- 내 전체 일정표 (학생, 리그 진행 중일 때) -->
@@ -163,6 +168,13 @@
             </thead>
             <tbody id="standingsBody"></tbody>
           </table>
+          <div id="rewardLegend" class="reward-legend hidden"></div>
+        </div>
+
+        <!-- 지난 경기 기록 (F13) -->
+        <div id="historyCard" class="card hidden">
+          <h3>📜 지난 경기 기록</h3>
+          <ul id="historyList" class="history-list"></ul>
         </div>
 
         <!-- 참가자 명단 (모집 중일 때) -->
@@ -191,6 +203,32 @@
         <button id="saveQuestionsBtn" class="btn">문제 저장하기</button>
         <p id="saveQMsg" class="msg"></p>
       </div>
+    </section>
+
+    <!-- 문제 풀기 화면 (F8/F9) -->
+    <section id="solveView" class="hidden">
+      <div class="card">
+        <div class="league-head">
+          <h2>🎯 상대 문제 풀기</h2>
+          <button id="solveBackBtn" class="btn-small btn">← 돌아가기</button>
+        </div>
+        <p class="hint">상대가 낸 문제예요. 다 풀고 제출하면 바로 채점돼요.</p>
+      </div>
+      <div id="solveForms"></div>
+      <div class="card">
+        <button id="submitAnswersBtn" class="btn">제출하고 채점받기</button>
+        <p id="submitMsg" class="msg"></p>
+      </div>
+    </section>
+
+    <!-- 채점 결과 화면 (F9) -->
+    <section id="resultView" class="hidden">
+      <div class="card result-head">
+        <h2>📊 채점 결과</h2>
+        <p id="resultScore" class="result-score"></p>
+        <button id="resultBackBtn" class="btn">리그 홈으로</button>
+      </div>
+      <div id="resultList"></div>
     </section>
   </main>
 
