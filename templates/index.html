@@ -333,11 +333,12 @@
       <div id="questionForms"></div>
       <div id="saveBox" class="card">
         <div class="save-row">
-          <button id="saveDraftBtn" class="btn btn-small" type="button">💾 임시 저장</button>
+          <!-- 자동 저장이 실패했을 때만 보인다 (글자가 바뀌어도 버튼이 움직이지 않게 앞에 둔다) -->
+          <button id="retryDraftBtn" class="btn btn-small hidden" type="button">다시 저장</button>
           <span id="draftStatus" class="draft-status"></span>
         </div>
         <p class="hint save-help">
-          쓰는 동안 자동으로 임시 저장돼요. 임시 저장은 경기에 쓰이지 않으니,
+          쓰는 동안 자동으로 저장돼요. 자동 저장은 경기에 쓰이지 않으니,
           다 만들면 꼭 아래 <b>문제 저장하기</b>를 눌러 주세요.
         </p>
         <button id="saveQuestionsBtn" class="btn">✅ 문제 저장하기 (완성)</button>

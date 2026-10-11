@@ -1436,7 +1436,7 @@ select {
 
 .save-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   flex-wrap: wrap;
 }
