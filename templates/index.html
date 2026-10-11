@@ -9,7 +9,7 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">⚽ 공부 축구 리그</div>
+    <button id="brandBtn" class="brand">⚽ 공부 축구 리그</button>
     <!-- 로그인 안 했을 때: 로그인/회원가입 버튼 -->
     <div id="guestArea" class="user-area">
       <button id="navLoginBtn" class="btn btn-small">로그인</button>
@@ -23,15 +23,15 @@
   </header>
 
   <main class="container">
-    <!-- 랜딩 화면 (로그인 전 첫 화면) -->
-    <section id="landingView">
+    <!-- ===== 처음 화면: 관리자 / 학생 고르기 ===== -->
+    <section id="landingView" class="view">
       <div class="landing">
         <div class="landing-logo">
           <span class="logo-mark">⚽</span>
           <span class="logo-text">공부 축구 리그</span>
         </div>
         <h1 class="landing-title">공부를 리그로.</h1>
-        <p class="landing-sub">
+        <p id="landingSub" class="landing-sub">
           반 친구들과 서로 문제를 내고 풀어 승점을 쌓아요.<br />
           프리미어리그처럼 매주 한 경기씩, 순위를 겨뤄요.
         </p>
@@ -39,7 +39,7 @@
           <button class="portal portal-admin" data-role="admin">
             <span class="portal-icon">🧑‍🏫</span>
             <span class="portal-name">선생님 관리실</span>
-            <span class="portal-desc">리그를 만들고 학생·순위를 관리해요.</span>
+            <span class="portal-desc">리그를 만들고 일정·학생·순위를 관리해요.</span>
             <span class="portal-go">들어가기 →</span>
           </button>
           <button class="portal portal-student" data-role="student">
@@ -52,18 +52,16 @@
       </div>
     </section>
 
-    <!-- 로그인 전 화면 -->
-    <section id="authView" class="hidden">
+    <!-- ===== 로그인 / 회원가입 ===== -->
+    <section id="authView" class="view hidden">
       <button id="authBackBtn" class="btn-small btn back-link">← 처음으로</button>
-      <p id="authRoleHint" class="role-hint"></p>
+      <p id="authRoleHint" class="role-hint hidden"></p>
 
-      <!-- 탭 버튼 -->
       <div class="tabs">
         <button id="tabLogin" class="tab active">로그인</button>
         <button id="tabRegister" class="tab">회원가입</button>
       </div>
 
-      <!-- 로그인 폼 -->
       <form id="loginForm" class="card">
         <h2>로그인</h2>
         <label>아이디
@@ -76,7 +74,6 @@
         <p id="loginMsg" class="msg"></p>
       </form>
 
-      <!-- 회원가입 폼 -->
       <form id="registerForm" class="card hidden">
         <h2>회원가입</h2>
         <label>아이디 <small>(영문·숫자 4~20자)</small>
@@ -85,7 +82,7 @@
         <label>비밀번호 <small>(8~64자)</small>
           <input type="password" id="regPassword" autocomplete="new-password" />
         </label>
-        <label>닉네임 <small>(1~10자)</small>
+        <label>닉네임 <small>(1~10자, 순위표에 보여요)</small>
           <input type="text" id="regNickname" />
         </label>
         <button type="submit" class="btn">가입하기</button>
@@ -93,126 +90,258 @@
       </form>
     </section>
 
-    <!-- 로그인 후 화면 -->
-    <section id="homeView" class="hidden">
-      <!-- (가) 아직 리그에 없을 때: 만들기 / 입장 고르기 -->
-      <div id="noLeagueView">
-        <div class="card">
-          <h2>리그 입장 🎟️</h2>
-          <p class="hint">선생님께 받은 6자리 코드를 넣어 주세요.</p>
-          <form id="joinForm">
-            <input type="text" id="joinCode" inputmode="numeric" maxlength="6"
-                   placeholder="예: 634322" />
-            <button type="submit" class="btn">입장하기</button>
-            <p id="joinMsg" class="msg"></p>
-          </form>
+    <!-- ===== 관리자: 내 리그 목록 ===== -->
+    <section id="adminView" class="view hidden">
+      <button class="btn-small btn back-link go-landing">← 처음으로</button>
+      <div class="card">
+        <div class="league-head">
+          <h2>🧑‍🏫 내가 만든 리그</h2>
         </div>
-
-        <div class="card">
-          <h2>리그 만들기 🧑‍🏫</h2>
-          <p class="hint">선생님(또는 반장)이라면 새 리그를 만들 수 있어요.</p>
-          <form id="createForm">
-            <input type="text" id="leagueName" maxlength="30"
-                   placeholder="리그 이름 (예: 1학년 3반 리그)" />
-            <div class="subject-label">과목 (과목 이름 + 문제 수)</div>
-            <div id="subjectRows"></div>
-            <button type="button" id="addSubjectBtn" class="btn-small btn" style="margin-bottom:10px">+ 과목 추가</button>
-            <div class="subject-label">상품·벌칙 (선택)</div>
-            <div id="rewardRows"></div>
-            <button type="button" id="addRewardBtn" class="btn-small btn" style="margin-bottom:10px">+ 상품/벌칙 추가</button>
-            <button type="submit" class="btn btn-outline">리그 만들기</button>
-            <p id="createMsg" class="msg"></p>
-          </form>
-        </div>
-      </div>
-
-      <!-- (나) 리그에 들어가 있을 때: 리그 정보 + 명단 -->
-      <div id="leagueView" class="hidden">
-        <div class="card">
-          <div class="league-head">
-            <h2 id="leagueName2"></h2>
-            <span id="leagueStatus" class="badge"></span>
-          </div>
-          <div id="weekInfo" class="week-info hidden"></div>
-          <div id="adminCodeBox" class="code-box hidden">
-            <span class="code-label">리그 코드</span>
-            <span id="leagueCode" class="code-value"></span>
-            <span class="hint">학생들에게 이 코드를 알려 주세요</span>
-          </div>
-        </div>
-
-        <!-- 이번 주 경기 카드 (학생, 리그 진행 중일 때) -->
-        <div id="matchCard" class="card hidden">
-          <h3>⚽ 이번 주 경기</h3>
-          <p id="opponentText" class="opponent"></p>
-          <button id="makeQuestionsBtn" class="btn" style="margin-top:14px">✏️ 내 문제 만들기</button>
-          <button id="solveBtn" class="btn btn-outline hidden" style="margin-top:10px">🎯 상대 문제 풀기</button>
-          <p id="matchStatus" class="match-status"></p>
-        </div>
-
-        <!-- 내 전체 일정표 (학생, 리그 진행 중일 때) -->
-        <div id="scheduleCard" class="card hidden">
-          <h3>📅 내 전체 일정</h3>
-          <ul id="scheduleList" class="schedule-list"></ul>
-        </div>
-
-        <!-- 순위표 (리그 진행 중일 때) -->
-        <div id="standingsCard" class="card hidden">
-          <h3>🏆 순위표</h3>
-          <table class="standings">
-            <thead>
-              <tr>
-                <th>순위</th><th>닉네임</th><th>경기</th>
-                <th>승</th><th>무</th><th>패</th><th>승점</th>
-              </tr>
-            </thead>
-            <tbody id="standingsBody"></tbody>
-          </table>
-          <div id="rewardLegend" class="reward-legend hidden"></div>
-        </div>
-
-        <!-- 지난 경기 기록 (F13) -->
-        <div id="historyCard" class="card hidden">
-          <h3>📜 지난 경기 기록</h3>
-          <ul id="historyList" class="history-list"></ul>
-        </div>
-
-        <!-- 참가자 명단 (모집 중일 때) -->
-        <div id="membersCard" class="card">
-          <h3>참가자 <span id="memberCount" class="count"></span></h3>
-          <ul id="memberList" class="member-list"></ul>
-          <p id="emptyMembers" class="hint hidden">아직 들어온 학생이 없어요.</p>
-          <!-- 관리자: 리그 시작 버튼 (모집 중일 때만) -->
-          <button id="startBtn" class="btn hidden" style="margin-top:16px">리그 시작하기</button>
-          <p id="startMsg" class="msg"></p>
-        </div>
+        <ul id="adminLeagueList" class="league-list"></ul>
+        <p id="adminEmpty" class="hint hidden">아직 만든 리그가 없어요. 첫 리그를 만들어 보세요!</p>
+        <button id="newLeagueBtn" class="btn">+ 새 리그 만들기</button>
       </div>
     </section>
 
-    <!-- 문제 만들기 화면 (F7) -->
-    <section id="questionsView" class="hidden">
+    <!-- ===== 관리자: 리그 만들기 / 설정 수정 ===== -->
+    <section id="leagueFormView" class="view hidden">
+      <button id="formBackBtn" class="btn-small btn back-link">← 돌아가기</button>
+      <form id="leagueForm">
+        <div class="card">
+          <h2 id="formTitle">새 리그 만들기</h2>
+          <label>리그 이름
+            <input type="text" id="fName" maxlength="30" placeholder="예: 2학년 3반 공부 리그" />
+          </label>
+          <label>학생에게 보일 안내 <small>(선택, 300자까지)</small>
+            <textarea id="fNotice" rows="2" maxlength="300"
+                      placeholder="예: 매주 수요일 밤 10시까지 문제를 꼭 만들어 주세요!"></textarea>
+          </label>
+        </div>
+
+        <div class="card">
+          <h3>📚 과목과 문제 수</h3>
+          <p class="hint">경기마다 학생 한 명이 상대를 위해 만드는 문제 수예요.</p>
+          <div id="subjectRows"></div>
+          <button type="button" id="addSubjectBtn" class="btn-small btn">+ 과목 추가</button>
+          <p id="subjectTotal" class="hint total-line"></p>
+        </div>
+
+        <div class="card">
+          <h3>📅 경기 일정</h3>
+          <div class="grid-2">
+            <label>첫 경기 시작일
+              <input type="date" id="fStartDate" />
+            </label>
+            <label>마감 시각
+              <input type="time" id="fDeadlineTime" value="22:00" />
+            </label>
+            <label>한 경기 기간
+              <select id="fRoundDays"></select>
+            </label>
+            <label>그중 문제 만드는 기간
+              <select id="fMakeDays"></select>
+            </label>
+          </div>
+          <label>대진 방식
+            <select id="fLegs">
+              <option value="1">모두와 한 번씩 붙기</option>
+              <option value="2">모두와 두 번씩 붙기 (전반기·후반기)</option>
+            </select>
+          </label>
+          <div class="preview-box">
+            <div class="preview-title">이렇게 진행돼요</div>
+            <ol id="schedulePreview" class="preview-steps"></ol>
+            <div class="preview-calc">
+              예상 학생 수
+              <input type="number" id="fExpect" min="2" max="60" value="20" />명이면
+              <b id="previewWeeks"></b>
+            </div>
+            <p id="previewBye" class="hint preview-bye"></p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>🏅 승점과 인원</h3>
+          <div class="grid-3">
+            <label>승<input type="number" id="fPtsWin" min="0" max="10" value="3" /></label>
+            <label>무<input type="number" id="fPtsDraw" min="0" max="10" value="1" /></label>
+            <label>패<input type="number" id="fPtsLose" min="0" max="10" value="0" /></label>
+          </div>
+          <label>인원 제한 <small>(0이면 제한 없음)</small>
+            <input type="number" id="fMax" min="0" max="60" value="0" />
+          </label>
+        </div>
+
+        <div class="card">
+          <h3>🎁 상품·벌칙 <small class="h-small">(선택)</small></h3>
+          <p class="hint">순위표에서 이 구간이 색으로 표시돼요.</p>
+          <div id="rewardRows"></div>
+          <button type="button" id="addRewardBtn" class="btn-small btn">+ 상품/벌칙 추가</button>
+        </div>
+
+        <div class="card">
+          <button type="submit" id="formSubmitBtn" class="btn">리그 만들기</button>
+          <p id="formMsg" class="msg"></p>
+        </div>
+      </form>
+    </section>
+
+    <!-- ===== 관리자: 리그 관리 ===== -->
+    <section id="adminLeagueView" class="view hidden">
+      <button id="adminLeagueBackBtn" class="btn-small btn back-link">← 내 리그 목록</button>
+
+      <div class="card">
+        <div class="league-head">
+          <h2 id="aName"></h2>
+          <span id="aStatus" class="badge"></span>
+        </div>
+        <div id="aWeekInfo" class="week-info hidden"></div>
+        <div class="code-box">
+          <span class="code-label">리그 코드</span>
+          <span id="aCode" class="code-value"></span>
+          <span id="aCodeHint" class="hint">학생들에게 이 코드를 알려 주세요</span>
+        </div>
+      </div>
+
+      <!-- 이번 주 진행 상황 (진행 중) -->
+      <div id="aProgressCard" class="card hidden">
+        <h3>⏱️ <span id="aProgressTitle"></span></h3>
+        <div id="aPhaseBox"></div>
+        <ul id="aProgressList" class="progress-list"></ul>
+        <p class="hint legend-line">✏️ 문제 다 만듦 · 🎯 상대 문제 다 풂</p>
+        <button id="aAdvanceBtn" class="btn btn-outline hidden"></button>
+        <p id="aAdvanceMsg" class="msg"></p>
+      </div>
+
+      <div id="aStandingsCard" class="card hidden">
+        <h3>🏆 순위표</h3>
+        <div id="aStandings"></div>
+      </div>
+
+      <div id="aScheduleCard" class="card hidden">
+        <h3>📅 전체 경기 일정</h3>
+        <div id="aSchedule"></div>
+      </div>
+
+      <div class="card">
+        <h3>참가 학생 <span id="aMemberCount" class="count"></span></h3>
+        <ul id="aMemberList" class="member-list"></ul>
+        <p id="aEmptyMembers" class="hint hidden">아직 들어온 학생이 없어요. 코드를 알려 주세요!</p>
+        <div id="aStartBox" class="hidden">
+          <p id="aStartHint" class="hint start-hint"></p>
+          <button id="aStartBtn" class="btn">🏁 리그 시작하기 (대진 추첨)</button>
+          <p id="aStartMsg" class="msg"></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="league-head">
+          <h3>⚙️ 리그 설정</h3>
+          <button id="aEditBtn" class="btn btn-small hidden">설정 수정</button>
+        </div>
+        <dl id="aSettings" class="settings-list"></dl>
+        <button id="aDeleteBtn" class="btn btn-danger hidden">리그 삭제</button>
+      </div>
+    </section>
+
+    <!-- ===== 학생: 리그 입장 ===== -->
+    <section id="joinView" class="view hidden">
+      <button class="btn-small btn back-link go-landing">← 처음으로</button>
+      <div class="card">
+        <h2>리그 입장 🎟️</h2>
+        <p class="hint">선생님께 받은 6자리 코드를 넣어 주세요. 리그는 하나만 들어갈 수 있어요.</p>
+        <form id="joinForm">
+          <input type="text" id="joinCode" inputmode="numeric" maxlength="6"
+                 placeholder="예: 634322" class="code-input" />
+          <button type="submit" class="btn">입장하기</button>
+          <p id="joinMsg" class="msg"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== 학생: 리그 홈 ===== -->
+    <section id="studentView" class="view hidden">
+      <button class="btn-small btn back-link go-landing">← 처음으로</button>
+
+      <div class="card">
+        <div class="league-head">
+          <h2 id="sName"></h2>
+          <span id="sStatus" class="badge"></span>
+        </div>
+        <div id="sWeekInfo" class="week-info hidden"></div>
+        <p id="sNotice" class="notice hidden"></p>
+      </div>
+
+      <!-- 모집 중: 기다리는 화면 -->
+      <div id="sWaitCard" class="card hidden">
+        <h3>⏳ 리그 시작을 기다리는 중</h3>
+        <p class="hint">선생님이 리그를 시작하면 대진표가 추첨되고 경기 일정이 나와요.</p>
+        <div id="sRules"></div>
+        <h3 class="sub-h">참가 학생 <span id="sMemberCount" class="count"></span></h3>
+        <ul id="sMemberList" class="member-list"></ul>
+        <button id="sLeaveBtn" class="btn btn-small btn-leave">리그 나가기</button>
+        <p id="sLeaveMsg" class="msg"></p>
+      </div>
+
+      <!-- 이번 주 경기 -->
+      <div id="sMatchCard" class="card hidden">
+        <h3 id="sMatchTitle">⚽ 이번 주 경기</h3>
+        <div id="sMatchBody"></div>
+        <div class="btn-col">
+          <button id="sMakeBtn" class="btn hidden">✏️ 내 문제 만들기</button>
+          <button id="sSolveBtn" class="btn btn-outline hidden">🎯 상대 문제 풀기</button>
+          <button id="sReviewBtn" class="btn btn-small hidden">📊 내 채점 결과 다시 보기</button>
+        </div>
+      </div>
+
+      <div id="sStandingsCard" class="card hidden">
+        <h3>🏆 순위표</h3>
+        <div id="sStandings"></div>
+      </div>
+
+      <div id="sScheduleCard" class="card hidden">
+        <div class="league-head">
+          <h3>📅 경기 일정</h3>
+          <div class="seg">
+            <button id="sOnlyMineBtn" class="seg-btn active">내 경기</button>
+            <button id="sAllBtn" class="seg-btn">전체</button>
+          </div>
+        </div>
+        <div id="sSchedule"></div>
+      </div>
+
+      <div id="sRecordCard" class="card hidden">
+        <h3>📜 내 경기 기록 <span id="sRecordSummary" class="count"></span></h3>
+        <ul id="sRecordList" class="history-list"></ul>
+      </div>
+    </section>
+
+    <!-- ===== 문제 만들기 (F7) ===== -->
+    <section id="questionsView" class="view hidden">
       <div class="card">
         <div class="league-head">
           <h2>✏️ 문제 만들기</h2>
-          <button id="backBtn" class="btn-small btn">← 돌아가기</button>
+          <button class="btn-small btn go-student">← 돌아가기</button>
         </div>
-        <p class="hint">과목별로 정해진 개수만큼 문제를 만들어 주세요. 저장하면 다시 와도 그대로예요.</p>
+        <p id="qInfo" class="q-info"></p>
+        <p id="qHint" class="hint">과목별로 정해진 개수만큼 만들어 주세요. 마감 전까지는 몇 번이든 고칠 수 있어요.</p>
       </div>
       <div id="questionForms"></div>
-      <div class="card">
+      <div id="saveBox" class="card">
         <button id="saveQuestionsBtn" class="btn">문제 저장하기</button>
         <p id="saveQMsg" class="msg"></p>
       </div>
     </section>
 
-    <!-- 문제 풀기 화면 (F8/F9) -->
-    <section id="solveView" class="hidden">
+    <!-- ===== 문제 풀기 (F8/F9) ===== -->
+    <section id="solveView" class="view hidden">
       <div class="card">
         <div class="league-head">
           <h2>🎯 상대 문제 풀기</h2>
-          <button id="solveBackBtn" class="btn-small btn">← 돌아가기</button>
+          <button class="btn-small btn go-student">← 돌아가기</button>
         </div>
-        <p class="hint">상대가 낸 문제예요. 다 풀고 제출하면 바로 채점돼요.</p>
+        <p id="solveInfo" class="q-info"></p>
+        <p class="hint">제출은 한 번만 할 수 있어요. 제출하면 바로 채점돼요.</p>
       </div>
       <div id="solveForms"></div>
       <div class="card">
@@ -221,12 +350,12 @@
       </div>
     </section>
 
-    <!-- 채점 결과 화면 (F9) -->
-    <section id="resultView" class="hidden">
+    <!-- ===== 채점 결과 (F9) ===== -->
+    <section id="resultView" class="view hidden">
       <div class="card result-head">
         <h2>📊 채점 결과</h2>
         <p id="resultScore" class="result-score"></p>
-        <button id="resultBackBtn" class="btn">리그 홈으로</button>
+        <button class="btn go-student">리그 홈으로</button>
       </div>
       <div id="resultList"></div>
     </section>
