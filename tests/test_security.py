@@ -1,6 +1,8 @@
 """권한·정보 보호·이상한 입력 (SPEC 5. 보안·안전)"""
 import pytest
 
+from classleague.db import get_db
+
 from conftest import PASSWORD, current, questions
 
 
@@ -26,8 +28,7 @@ def test_login_required(app, method, url):
 def test_password_is_hashed(app, new_user):
     new_user("stu0001", "민수")
     with app.app_context():
-        import app as A
-        h = A.get_db().execute("SELECT password_hash FROM user WHERE username='stu0001'").fetchone()[0]
+        h = get_db().execute("SELECT password_hash FROM user WHERE username='stu0001'").fetchone()[0]
     assert PASSWORD not in h and h.startswith("$2")
 
 

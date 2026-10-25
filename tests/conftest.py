@@ -16,8 +16,10 @@ os.environ["DATABASE_PATH"] = os.path.join(tempfile.mkdtemp(), "import.db")
 os.environ.setdefault("SECRET_KEY", "test-secret")
 
 import app as app_module  # noqa: E402
+from classleague import clock as clock_module, db as db_module  # noqa: E402
+from classleague.routes.auth import bcrypt  # noqa: E402
 
-app_module.bcrypt._log_rounds = 4  # 시험에서는 해시를 가볍게 (진짜 서버는 기본값 12)
+bcrypt._log_rounds = 4  # 시험에서는 해시를 가볍게 (진짜 서버는 기본값 12)
 
 PASSWORD = "password123"
 # 2026-10-25(일) 12:00 KST. 다음 날(월)이 첫 경기 요일이 되도록 고른 시각
@@ -35,15 +37,15 @@ class Clock:
 @pytest.fixture
 def clock(monkeypatch):
     c = Clock(START)
-    monkeypatch.setattr(app_module, "now_utc", lambda: c.now)
-    monkeypatch.setattr(app_module, "today_kst", lambda: c.now.astimezone(app_module.KST).date())
+    # 모든 코드가 clock.now_utc() 하나로 '지금'을 정하므로 여기만 바꾸면 된다 (today_kst도 따라온다)
+    monkeypatch.setattr(clock_module, "now_utc", lambda: c.now)
     return c
 
 
 @pytest.fixture
 def app(tmp_path, monkeypatch, clock):
-    monkeypatch.setattr(app_module, "DB_PATH", str(tmp_path / "test.db"))
-    app_module.init_db()
+    monkeypatch.setattr(db_module, "DB_PATH", str(tmp_path / "test.db"))
+    db_module.init_db()
     app_module.app.config["TESTING"] = True
     return app_module.app
 
