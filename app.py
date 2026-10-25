@@ -40,7 +40,8 @@ bcrypt = Bcrypt(app)
 DUMMY_PASSWORD_HASH = bcrypt.generate_password_hash(secrets.token_hex(16)).decode("utf-8")
 login_manager = LoginManager(app)
 
-DB_PATH = "app.db"
+# 서버를 어느 폴더에서 켜도 같은 DB를 쓰도록 app.py 옆에 둔다. 시험할 때는 DATABASE_PATH로 바꾼다.
+DB_PATH = os.environ.get("DATABASE_PATH") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "app.db")
 
 
 # ---------- DB 준비 ----------
