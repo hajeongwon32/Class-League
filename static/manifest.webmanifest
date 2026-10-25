@@ -1,12 +1,17 @@
 {
-  "name": "공부 축구 리그",
-  "short_name": "공부리그",
-  "start_url": "/",
+  "name": "Class League · 학교 공부 리그",
+  "short_name": "Class League",
+  "description": "친구와 서로 문제를 내고 풀며 승점을 쌓는 공부 리그",
+  "lang": "ko",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f4f6fb",
-  "theme_color": "#1e3a8a",
+  "orientation": "portrait",
+  "background_color": "#faf9f0",
+  "theme_color": "#6f9d4e",
   "icons": [
-    { "src": "/static/icon.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
