@@ -1,11 +1,31 @@
 // Class League 서비스 워커 (PWA 설치·오프라인 안내용)
 // - 화면 파일(HTML·CSS·JS·아이콘)만 저장한다.
 // - 로그인·경기·문제 같은 API 응답은 절대 저장하지 않는다 (같은 기기의 다른 사람에게 남지 않게).
-const CACHE = "class-league-v2";
+const CACHE = "class-league-v4";
 const SHELL = [
   "/",
-  "/static/index.css",
-  "/static/index.js",
+  "/static/css/01-base.css",
+  "/static/css/02-league.css",
+  "/static/css/03-questions.css",
+  "/static/css/04-landing.css",
+  "/static/css/05-match.css",
+  "/static/css/06-modal-notes.css",
+  "/static/css/07-schedule.css",
+  "/static/css/08-admin.css",
+  "/static/css/09-layout.css",
+  "/static/css/10-screens.css",
+  "/static/css/11-extras.css",
+  "/static/js/01-core.js",
+  "/static/js/02-auth.js",
+  "/static/js/03-league.js",
+  "/static/js/04-standings.js",
+  "/static/js/05-schedule.js",
+  "/static/js/06-admin.js",
+  "/static/js/07-create.js",
+  "/static/js/08-history.js",
+  "/static/js/09-match.js",
+  "/static/js/10-reports.js",
+  "/static/js/11-notes.js",
   "/static/manifest.webmanifest",
   "/static/icon-192.png",
   "/static/icon-512.png",

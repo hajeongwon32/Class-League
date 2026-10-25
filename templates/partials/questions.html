@@ -1,0 +1,32 @@
+{# 문제 만들기 #}
+<!-- 문제 만들기 화면 (F7) -->
+<section id="questionsView" class="hidden">
+  <div class="card">
+    <div class="league-head">
+      <h2>✏️ 문제 만들기</h2>
+      <div class="q-top-btns">
+        <button type="button" id="saveTopBtn" class="btn btn-small">💾 임시 저장</button>
+        <button type="button" id="reopenTopBtn" class="btn btn-small btn-outline hidden">✏️ 다시 고치기</button>
+        <button id="backBtn" class="btn-small btn">← 뒤로가기</button>
+      </div>
+    </div>
+    <p id="qOpponent" class="opponent"></p>
+    <p id="qDeadline" class="match-deadline"></p>
+    <p id="qCountdown" class="countdown hidden" aria-live="polite"></p>
+    <p id="qStateBox" class="q-state" aria-live="polite"></p>
+    <p id="qWarn" class="q-warn"></p>
+    <p class="hint">이번 상대에게 낼 문제를 과목·개수에 맞춰 만들어요. [임시 저장]은 몇 번이든 할 수 있고, 다 되면 [완성 ✅]을 눌러요. 저장은 버튼을 눌러야만 돼요.</p>
+  </div>
+  <div id="questionForms"></div>
+  <!-- 맨 아래 버튼 줄: 다 쓰고 나서 저장·완성·나가기 -->
+  <div class="card q-actions">
+    <p id="qSavedAt" class="hint"></p>
+    <div class="q-action-grid">
+      <button type="button" id="backBtn2" class="btn btn-small">← 뒤로가기</button>
+      <button id="saveQuestionsBtn" class="btn btn-outline">💾 임시 저장</button>
+      <button id="completeBtn" class="btn">완성 ✅</button>
+    </div>
+    <button id="reopenBtn" class="btn btn-outline hidden">✏️ 다시 고치기</button>
+    <p id="saveQMsg" class="msg" aria-live="polite"></p>
+  </div>
+</section>

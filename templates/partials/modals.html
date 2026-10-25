@@ -1,0 +1,53 @@
+{# 확인 창, 문제 신고 창, 닉네임 바꾸기 창 #}
+<!-- 확인 창 (브라우저 기본 confirm 대신 쓰는 앱 디자인 창) -->
+<div id="confirmModal" class="modal-backdrop hidden">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <div id="confirmIcon" class="modal-icon">🚪</div>
+    <h3 id="confirmTitle" class="modal-title"></h3>
+    <p id="confirmText" class="modal-text"></p>
+    <div class="modal-actions">
+      <button type="button" id="confirmCancel" class="btn btn-small">취소</button>
+      <button type="button" id="confirmAlt" class="btn btn-small hidden"></button>
+      <button type="button" id="confirmOk" class="btn"></button>
+    </div>
+  </div>
+</div>
+
+<!-- 닉네임 바꾸기 창 -->
+<!-- 문제 신고 창 -->
+<div id="reportModal" class="modal-backdrop hidden">
+  <form id="reportForm" class="modal" role="dialog" aria-modal="true" aria-labelledby="reportTitle">
+    <div class="modal-icon">🚩</div>
+    <h3 id="reportTitle" class="modal-title">이 문제를 신고할까요?</h3>
+    <p id="reportQText" class="modal-text"></p>
+    <fieldset class="report-reasons">
+      <legend class="sr-only">신고 이유</legend>
+      <label><input type="radio" name="reportReason" value="wrong_answer" /> 정답이 틀렸어요</label>
+      <label><input type="radio" name="reportReason" value="out_of_scope" /> 출제 범위를 벗어났어요</label>
+      <label><input type="radio" name="reportReason" value="unclear" /> 문제나 보기가 불분명해요</label>
+      <label><input type="radio" name="reportReason" value="prank" /> 장난 문제예요</label>
+      <label><input type="radio" name="reportReason" value="other" /> 기타</label>
+    </fieldset>
+    <textarea id="reportDetail" maxlength="200" rows="2" placeholder="자세한 이유 (선택, '기타'는 꼭 적어 주세요)" aria-label="자세한 신고 이유"></textarea>
+    <p class="hint">한 문제는 한 번만 신고할 수 있어요. 관리자가 확인해서 [무효] 또는 [문제없음]으로 판정해요.</p>
+    <p id="reportMsg" class="msg"></p>
+    <div class="modal-actions">
+      <button type="button" id="reportCancel" class="btn btn-small">취소</button>
+      <button type="submit" id="reportSubmit" class="btn">신고하기</button>
+    </div>
+  </form>
+</div>
+
+<div id="nicknameModal" class="modal-backdrop hidden">
+  <form id="nicknameForm" class="modal" role="dialog" aria-modal="true" aria-labelledby="nicknameTitle" aria-describedby="nicknameHint">
+    <div class="modal-icon">✏️</div>
+    <h3 id="nicknameTitle" class="modal-title">닉네임 바꾸기</h3>
+    <p id="nicknameHint" class="modal-text"></p>
+    <input type="text" id="nicknameInput" maxlength="10" autocomplete="off" aria-label="새 닉네임" />
+    <p id="nicknameMsg" class="msg"></p>
+    <div class="modal-actions">
+      <button type="button" id="nicknameCancel" class="btn btn-small">취소</button>
+      <button type="submit" id="nicknameSave" class="btn">바꾸기</button>
+    </div>
+  </form>
+</div>

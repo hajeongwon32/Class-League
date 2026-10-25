@@ -1,0 +1,230 @@
+/* 01-base.css · 기본: 색 테마, 위쪽 바, 카드, 입력칸, 버튼, 안내 문구 */
+
+/* ===== 색 테마 (잔디밭 축구장 느낌) ===== */
+:root {
+  --grass: #6f9d4e;        /* 상단바 잔디 초록 */
+  --grass-dark: #557a3a;   /* 진한 초록 */
+  --grass-line: #7faa5c;   /* 잔디 줄무늬 */
+  --ink: #1f2a1a;          /* 글자/테두리용 짙은 색 */
+  --cream: #faf9f0;        /* 바탕 크림색 */
+  --paper: #ffffff;        /* 카드 흰색 */
+  --yellow: #e9e36b;       /* 노란 포인트 */
+  --yellow-soft: #f5f0c0;  /* 연노랑 (안내 박스) */
+  --olive: #94a85a;        /* 연두 포인트 */
+  --red: #d8604a;          /* 빨강 포인트 */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ===== 위쪽 바 (잔디밭 + 체크무늬 질감) ===== */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background-color: var(--grass);
+  /* 잔디 세로 줄무늬 느낌 */
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--grass) 0,
+    var(--grass) 38px,
+    var(--grass-line) 38px,
+    var(--grass-line) 76px
+  );
+  color: #fff;
+  border-bottom: 4px solid var(--ink);
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nickname {
+  font-weight: 700;
+  background: var(--yellow);
+  color: var(--ink);
+  padding: 5px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+}
+
+/* ===== 가운데 영역 ===== */
+.container {
+  max-width: 460px;
+  margin: 36px auto;
+  padding: 0 18px;
+}
+
+/* ===== 탭 ===== */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.tab {
+  flex: 1;
+  padding: 13px;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--yellow);
+}
+
+/* ===== 카드 (두꺼운 검은 테두리) ===== */
+.card {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 5px 5px 0 rgba(31, 42, 26, 0.9);
+}
+
+.card + .card {
+  margin-top: 20px;
+}
+
+.card h2 {
+  margin: 0 0 18px;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.card h3 {
+  margin: 0 0 14px;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+/* ===== 입력칸 ===== */
+label {
+  display: block;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+label small {
+  font-weight: 500;
+  color: #8a8f7d;
+}
+
+input {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  padding: 12px 13px;
+  border: 3px solid var(--ink);
+  border-radius: 7px;
+  font-size: 15px;
+  background: #fff;
+}
+
+input:focus {
+  outline: none;
+  background: #fffdf0;
+  box-shadow: 3px 3px 0 var(--olive);
+}
+
+/* ===== 버튼 ===== */
+.btn {
+  width: 100%;
+  padding: 13px;
+  border: 3px solid var(--ink);
+  background: var(--grass);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 4px;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.btn:hover {
+  background: var(--grass-dark);
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.btn-outline {
+  background: var(--yellow);
+  color: var(--ink);
+}
+
+.btn-outline:hover {
+  background: #e0d955;
+}
+
+.btn-small {
+  width: auto;
+  padding: 8px 14px;
+  font-size: 13px;
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.btn-small:hover {
+  background: #f0efe4;
+}
+
+/* ===== 메시지 ===== */
+.msg {
+  margin: 12px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  min-height: 18px;
+}
+
+.msg.ok {
+  color: var(--grass-dark);
+}
+
+.msg.err {
+  color: var(--red);
+}
+
+/* ===== 안내 문구 ===== */
+.hint {
+  font-size: 13px;
+  color: #6b7256;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+

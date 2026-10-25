@@ -1,0 +1,14 @@
+{# 관리자 할 일 서랍 #}
+<!-- 관리자 + 모집 중: 리그 시작까지 할 일 (옆에서 튀어나오는 서랍) -->
+<div id="adminTodo" class="hidden">
+  <button type="button" id="todoToggle" class="todo-tab" aria-expanded="false" aria-controls="todoDrawer">
+    📝 할 일 <span id="todoCount" class="todo-count"></span>
+  </button>
+  <aside id="todoDrawer" class="todo-drawer" aria-label="리그 시작까지 할 일">
+    <div class="todo-drawer-head">
+      <h3>📝 리그 시작까지 할 일</h3>
+      <button type="button" id="todoClose" class="btn btn-small" aria-label="닫기">✕</button>
+    </div>
+    <ol id="adminTodoList" class="todo-list"></ol>
+  </aside>
+</div>

@@ -1,0 +1,18 @@
+{# 상대 문제 풀기 #}
+<!-- 문제 풀기 화면 (F8/F9) -->
+<section id="solveView" class="hidden">
+  <div class="card">
+    <div class="league-head">
+      <h2>🎯 상대 문제 풀기</h2>
+      <button id="solveBackBtn" class="btn-small btn">← 돌아가기</button>
+    </div>
+    <p class="hint">상대가 낸 문제예요. 다 풀고 제출하면 바로 채점돼요.</p>
+    <p id="solveDeadline" class="match-deadline"></p>
+    <p id="solveCountdown" class="countdown hidden" aria-live="polite"></p>
+  </div>
+  <div id="solveForms"></div>
+  <div class="card">
+    <button id="submitAnswersBtn" class="btn">제출하고 채점받기</button>
+    <p id="submitMsg" class="msg"></p>
+  </div>
+</section>

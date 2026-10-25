@@ -1,0 +1,25 @@
+{# 오답 노트 #}
+<!-- 오답 노트 (F18) -->
+<section id="noteView" class="hidden">
+  <div class="card">
+    <div class="league-head">
+      <h2>📒 오답 노트</h2>
+      <button type="button" class="btn-small btn back-home">← 뒤로가기</button>
+    </div>
+    <p class="hint">리그 경기에서 틀린 문제가 모여요. 나만 볼 수 있어요.</p>
+    <div class="note-filters">
+      <label class="note-filter">과목
+        <select id="noteSubject"></select>
+      </label>
+      <label class="note-toggle">
+        <input type="checkbox" id="noteHideKnown" checked />
+        이제 알아요 숨기기
+      </label>
+    </div>
+    <p id="noteCount" class="hint"></p>
+  </div>
+  <div id="noteList"></div>
+  <div id="noteEmpty" class="card empty-card hidden">
+    <p id="noteEmptyText"></p>
+  </div>
+</section>

@@ -1,0 +1,202 @@
+{# 리그 홈: 이번 경기, 오답 노트, 순위표, 관리자 탭 #}
+<!-- (나) 리그에 들어가 있을 때 -->
+<div id="leagueView" class="hidden">
+  <div class="card">
+    <div class="league-head">
+      <h2 id="leagueName2"></h2>
+      <span id="leagueStatus" class="badge"></span>
+    </div>
+    <div id="weekInfo" class="week-info hidden"></div>
+    <button type="button" id="editSettingsBtn" class="btn btn-small hidden">⚙️ 리그 설정 고치기</button>
+    <button type="button" id="pastFromLeagueBtn" class="btn btn-small hidden">📚 지난 리그</button>
+  </div>
+
+  <!-- 끝난 리그 최종 결과 -->
+  <div id="finalCard" class="card final-card hidden">
+    <div class="final-trophy">🏆</div>
+    <h2>리그 최종 결과</h2>
+    <p id="finalWinner" class="final-winner"></p>
+    <p id="finalMyRank" class="final-my-rank"></p>
+    <div id="finalAwards" class="final-awards"></div>
+    <p id="finalPending" class="forfeit-reason hidden"></p>
+    <!-- 끝난 리그 정리 (F15): 학생은 보관, 관리자는 닫기 → 새 리그 -->
+    <div id="lifecycleBox" class="lifecycle-box hidden">
+      <p id="lifecycleText" class="hint"></p>
+      <button type="button" id="archiveBtn" class="btn hidden">📚 지난 리그로 보관하고 새 리그 시작</button>
+      <button type="button" id="closeLeagueBtn" class="btn hidden">📚 리그 닫고 새 리그 만들기</button>
+      <p id="lifecycleMsg" class="msg" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- 관리자 + 진행 중·끝: 메뉴 탭 (한 번에 한 가지만 보여서 신고가 쌓여도 다른 메뉴를 바로 연다) -->
+  <div id="adminTabs" class="admin-tabs hidden" role="tablist" aria-label="관리자 메뉴">
+    <button type="button" role="tab" class="admin-tab" id="tab-progress" data-tab="progress">📋 진행 상황</button>
+    <button type="button" role="tab" class="admin-tab" id="tab-reports" data-tab="reports">🚩 신고 <span id="reportTabBadge" class="tab-badge hidden">0</span></button>
+    <button type="button" role="tab" class="admin-tab" id="tab-scope" data-tab="scope">📖 출제 범위</button>
+    <button type="button" role="tab" class="admin-tab" id="tab-accuracy" data-tab="accuracy">📊 정답률</button>
+  </div>
+
+  <!-- 넓은 화면: 왼쪽은 지금 할 일, 오른쪽은 순위·명단 (좁은 화면에서는 한 줄로 쌓인다) -->
+  <div class="league-cols">
+    <div class="league-main">
+      <!-- 관리자 + 모집 중: 리그 코드 -->
+      <div id="adminCodeBox" class="card code-card hidden">
+        <span class="code-label">리그 코드</span>
+        <span id="leagueCode" class="code-value"></span>
+        <button type="button" id="copyCodeBtn" class="btn btn-small copy-btn">📋 코드 복사</button>
+        <span class="hint">학생들에게 이 코드를 알려 주세요</span>
+      </div>
+
+      <!-- 리그 정보 (학생, 모집 중일 때 읽기 전용) -->
+      <div id="leagueInfoCard" class="card hidden">
+        <h3>📋 리그 정보</h3>
+        <p class="hint">관리자가 정한 설정이에요. 리그가 시작되면 이대로 경기해요.</p>
+        <dl id="leagueInfoList" class="info-list"></dl>
+      </div>
+
+      <!-- 이번 경기 카드 (학생, 리그 진행 중일 때) -->
+      <div id="matchCard" class="card hidden">
+        <h3>⚔️ 이번 경기</h3>
+        <p id="opponentText" class="opponent"></p>
+        <p id="matchTask" class="match-task"></p>
+        <p id="matchDeadline" class="match-deadline"></p>
+        <p id="matchCountdown" class="countdown hidden" aria-live="polite"></p>
+        <ul id="matchScopes" class="scope-list hidden" aria-label="이번 라운드 출제 범위"></ul>
+        <button id="makeQuestionsBtn" class="btn">✏️ 문제 만들기</button>
+        <button id="solveBtn" class="btn btn-outline hidden">🎯 상대 문제 풀기</button>
+        <p id="matchStatus" class="match-status"></p>
+      </div>
+
+      <!-- 오답 노트: 이번 경기 바로 아래라 잊지 않고 복습할 수 있다 -->
+      <div id="studyCard" class="card wrong-note-card hidden">
+        <div class="wrong-note-head">
+          <h3>📒 오답 노트 <span id="wrongNoteBadge" class="wrong-note-badge hidden" aria-label="정리하지 않은 오답 0개">0</span></h3>
+          <span class="wrong-note-label">틀린 문제 복습</span>
+        </div>
+        <p id="wrongNoteSummary" class="hint">오답 개수를 확인하는 중…</p>
+        <button type="button" id="noteBtn" class="btn btn-outline">오답 노트 열기</button>
+      </div>
+
+      <!-- 관리자 + 진행 중·끝: 이번 라운드 진행 상황 (F16) -->
+      <div id="progressCard" class="card hidden" data-panel="progress">
+        <h3 id="progressTitle">📋 이번 라운드 진행 상황</h3>
+        <p id="progressSummary" class="setting-summary"></p>
+        <p id="progressCountdown" class="countdown hidden" aria-live="polite"></p>
+        <div class="table-wrap"><table class="round-table progress-table">
+          <caption class="sr-only">경기별 문제 완성·제출 여부</caption>
+          <thead><tr><th scope="col">학생</th><th scope="col">✏️ 완성</th><th scope="col">🎯 제출</th><th scope="col">상대</th><th scope="col">✏️ 완성</th><th scope="col">🎯 제출</th></tr></thead>
+          <tbody id="progressBody"></tbody>
+        </table></div>
+        <p class="hint progress-legend">✅ 함 · ⏳ 아직 · ❌ 마감까지 못 함 · ➖ 해당 없음 (만들기에서 몰수)</p>
+        <p id="progressByes" class="hint"></p>
+        <p class="hint">진행 중인 경기의 문제와 정답은 관리자도 볼 수 없어요. 완성·제출 여부만 보여요.</p>
+      </div>
+
+      <!-- 관리자 + 진행 중·끝: 신고 처리 (F17) -->
+      <div id="reportCard" class="card hidden" data-panel="reports">
+        <h3>🚩 신고 처리 <span id="reportBadge" class="wrong-note-badge hidden">0</span></h3>
+        <p class="hint">신고된 문제는 진행 중인 경기라도 볼 수 있어요. 문제·정답·해설·출제 범위를 보고 판정해 주세요. [무효]면 푼 학생에게 1점을 인정하고 점수·순위를 다시 계산해요.</p>
+        <p id="reportDeadline" class="countdown hidden" aria-live="polite"></p>
+        <div id="reportList"></div>
+        <details class="preview-details report-done">
+          <summary>처리한 신고 보기 <span id="reportDoneCount"></span></summary>
+          <div id="reportDoneList"></div>
+        </details>
+      </div>
+
+      <!-- 관리자 + 모집 중: 리그 시작 -->
+      <div id="startPanel" class="card hidden">
+        <h3>🚀 리그 시작</h3>
+        <p id="startDaysText" class="setting-summary"></p>
+        <label class="subject-label" for="firstDate">첫 경기 날짜</label>
+        <select id="firstDate"></select>
+        <div id="startPreview" class="preview-summary" aria-live="polite"></div>
+        <details class="preview-details">
+          <summary>라운드별 날짜·마감 시각 모두 보기</summary>
+          <div class="table-wrap"><table class="round-table">
+            <caption class="sr-only">라운드별 문제 만들기·풀기 마감</caption>
+            <thead><tr><th scope="col">라운드</th><th scope="col">✏️ 문제 만들기</th><th scope="col">🎯 문제 풀기</th></tr></thead>
+            <tbody id="startPreviewList"></tbody>
+          </table></div>
+        </details>
+        <button id="startBtn" class="btn">이 일정으로 시작</button>
+        <p id="startMsg" class="msg"></p>
+        <div class="danger-zone">
+          <button type="button" id="deleteLeagueBtn" class="btn btn-leave">🗑️ 리그 삭제</button>
+          <p class="hint">모집 중에만 삭제할 수 있어요. 시작한 뒤에는 학생들의 경기 기록을 지킬 수 있게 삭제할 수 없어요.</p>
+          <p id="deleteMsg" class="msg"></p>
+        </div>
+      </div>
+
+      <!-- 내 전체 일정표 (학생, 리그 진행 중일 때) -->
+      <div id="scheduleCard" class="card hidden">
+        <h3>📅 내 전체 일정</h3>
+        <ul id="scheduleList" class="schedule-list"></ul>
+      </div>
+
+      <!-- 지난 경기 기록 (F13) -->
+      <div id="historyCard" class="card hidden">
+        <h3>📜 지난 경기 기록</h3>
+        <p id="historyEmpty" class="hint hidden">아직 끝난 경기가 없어요.</p>
+        <ul id="historyList" class="history-list"></ul>
+      </div>
+
+      <!-- 관리자 + 진행 중: 라운드별 출제 범위 (F4-2) -->
+      <div id="scopeCard" class="card hidden" data-panel="scope">
+        <h3>📖 라운드별 출제 범위</h3>
+        <p class="hint">이번에 배운 내용을 다음 라운드 범위로 정해 주세요. 비워 두면 리그의 기본 범위를 써요. 라운드가 시작되면 🔒 잠겨서 바꿀 수 없어요.</p>
+        <div id="scopeNow" class="scope-now"></div>
+        <label class="subject-label" for="scopeRound">범위를 정할 라운드</label>
+        <select id="scopeRound"></select>
+        <div id="scopeFields"></div>
+        <button type="button" id="scopeSaveBtn" class="btn">이 라운드 범위 저장</button>
+        <p id="scopeMsg" class="msg" aria-live="polite"></p>
+        <details class="preview-details">
+          <summary>전체 라운드 범위 모두 보기</summary>
+          <div class="table-wrap"><table class="round-table">
+            <caption class="sr-only">라운드별 과목 출제 범위</caption>
+            <thead id="scopeTableHead"></thead>
+            <tbody id="scopeTableBody"></tbody>
+          </table></div>
+        </details>
+      </div>
+    </div>
+    <div class="league-side">
+      <div id="standingsCard" class="card hidden">
+        <h3 id="standingsTitle">🏆 순위표</h3>
+        <p id="standingsRule" class="hint"></p>
+        <div class="table-wrap"><table class="standings">
+          <thead id="standingsHead"></thead>
+          <tbody id="standingsBody"></tbody>
+        </table></div>
+        <div id="rewardLegend" class="reward-legend hidden"></div>
+      </div>
+
+      <!-- 관리자 + 진행 중·끝: 과목별 정답률 (F16-1) -->
+      <div id="accuracyCard" class="card hidden" data-panel="accuracy">
+        <h3>📊 과목별 정답률</h3>
+        <p class="hint">끝난 정상 경기에서 제출된 문제만 세요. 몰수 경기는 빼요.</p>
+        <div id="accuracyLeague" class="accuracy-bars"></div>
+        <details class="preview-details">
+          <summary>학생별 정답률 보기</summary>
+          <div class="table-wrap"><table class="round-table">
+            <caption class="sr-only">학생별 과목 정답률</caption>
+            <thead id="accuracyHead"></thead>
+            <tbody id="accuracyBody"></tbody>
+          </table></div>
+        </details>
+      </div>
+
+      <!-- 참가자 명단 -->
+      <div id="membersCard" class="card" data-panel="members">
+        <h3>참가자 <span id="memberCount" class="count"></span></h3>
+        <ul id="memberList" class="member-list"></ul>
+        <p id="emptyMembers" class="hint hidden">아직 들어온 학생이 없어요.</p>
+        <p id="waitHint" class="hint hidden">⏳ 관리자가 리그를 시작하면 대진표가 나와요.</p>
+        <!-- 학생: 리그 나가기 (모집 중일 때만) -->
+        <button id="leaveBtn" class="btn btn-leave hidden">리그 나가기</button>
+        <p id="leaveMsg" class="msg"></p>
+      </div>
+    </div>
+  </div>
+</div>
