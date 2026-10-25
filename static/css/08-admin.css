@@ -1,0 +1,459 @@
+/* 08-admin.css · 출제 범위, 남은 시간, 최종 결과, 관리자 화면, 신고, 리그 보관·삭제 */
+
+/* ===== 출제 범위 ===== */
+.scope-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.scope-list .scope-title {
+  font-weight: 800;
+}
+
+.scope-list strong::after {
+  content: " ·";
+}
+
+.scope-banner {
+  margin: -6px 0 12px;
+  padding: 8px 10px;
+  background: var(--yellow-soft);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.scope-now-title {
+  margin: 0;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+#scopeCard select,
+#scopeCard .scope-input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+}
+
+#scopeCard select {
+  padding: 10px;
+  border: 3px solid var(--ink);
+  border-radius: 7px;
+  font-size: 15px;
+  background: #fff;
+}
+
+#scopeCard .subject-label {
+  display: block;
+  margin-top: 12px;
+}
+
+#scopeSaveBtn {
+  margin-top: 14px;
+}
+
+.scope-default {
+  color: #6b7256;
+}
+
+/* ===== 6단계: 남은 시간 ===== */
+.countdown {
+  display: inline-block;
+  margin: 8px 0 0;
+  padding: 7px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--yellow-soft);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.countdown.urgent {
+  background: #fbe4df;
+  border-color: var(--red);
+  color: #b8452f;
+}
+
+/* ===== 6단계: 순위표·최종 결과 ===== */
+#standingsRule {
+  margin-top: -4px;
+}
+
+.final-card {
+  text-align: center;
+  background: var(--yellow-soft);
+}
+
+.final-trophy {
+  font-size: 46px;
+}
+
+.final-card h2 {
+  margin: 4px 0 8px;
+}
+
+.final-winner {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.final-my-rank {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.final-awards {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+  text-align: left;
+}
+
+.final-award {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 3px 12px;
+  padding: 10px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+}
+
+.final-award small {
+  grid-column: 1 / -1;
+}
+
+/* ===== 지난 경기 상세 ===== */
+.history-review-btn {
+  margin: 0 0 0 auto;
+  padding: 6px 9px;
+  white-space: nowrap;
+}
+
+.forfeit-reason {
+  padding: 10px 12px;
+  background: #fbe4df;
+  border: 2px solid var(--red);
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+@media (max-width: 560px) {
+  .history-review-btn {
+    flex-basis: 100%;
+    margin-top: 6px;
+  }
+}
+
+
+/* ===== 오답 노트 바로가기·숫자 배지 ===== */
+.wrong-note-card {
+  border-color: var(--ink);
+  background: #fffdf0;
+}
+
+.wrong-note-card.has-wrong {
+  background: var(--yellow-soft);
+}
+
+.wrong-note-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wrong-note-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+}
+
+.wrong-note-label {
+  padding: 4px 7px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.wrong-note-badge {
+  min-width: 25px;
+  height: 25px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.wrong-note-card .hint {
+  margin: 9px 0 12px;
+}
+
+.wrong-note-result {
+  margin: 8px 0 14px;
+  padding: 9px 11px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: var(--yellow-soft);
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.wrong-note-badge.hidden {
+  display: none;
+}
+
+/* ===== 7단계: 관리자 화면 ===== */
+.progress-table td {
+  font-size: 18px;
+}
+
+.progress-table tr.done-row {
+  background: #f1f6ea;
+}
+
+.accuracy-bars {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 12px;
+}
+
+.acc-row {
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.acc-bar {
+  height: 16px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.acc-fill {
+  display: block;
+  height: 100%;
+  background: var(--grass);
+}
+
+.acc-num {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.low-rate {
+  color: #b8452f;
+  font-weight: 800;
+}
+
+.member-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 800;
+  color: var(--grass-dark);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.member-link:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.student-round h3 {
+  margin-top: 0;
+}
+
+.admin-q {
+  border-top: 2px dashed #c9ccb8;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.opp-result {
+  font-weight: 800;
+  margin: 6px 0 0;
+}
+
+.locked-note {
+  font-weight: 800;
+  color: #6b7256;
+}
+
+/* ===== 8단계: 신고·무효 ===== */
+.q-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.q-actions-row .btn {
+  margin-top: 0;
+}
+
+
+.report-btn {
+  color: #b8452f;
+}
+
+.report-status {
+  font-size: 13px;
+  font-weight: 800;
+  color: #6b7256;
+}
+
+.void-q {
+  opacity: 0.8;
+}
+
+.void-badge {
+  margin: 8px 0 0;
+  padding: 6px 9px;
+  border: 2px dashed var(--red);
+  border-radius: 8px;
+  font-weight: 800;
+  color: #b8452f;
+  font-size: 13px;
+}
+
+.void-chip {
+  font-size: 12px;
+  font-weight: 800;
+  color: #b8452f;
+  border: 2px solid var(--red);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+
+.void-notice p {
+  margin: 6px 0 0;
+}
+
+
+
+.report-reasons {
+  border: 0;
+  padding: 0;
+  margin: 0 0 10px;
+  display: grid;
+  gap: 6px;
+  text-align: left;
+}
+
+.report-reasons label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.report-reasons input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+#reportDetail {
+  width: 100%;
+  border: 3px solid var(--ink);
+  border-radius: 7px;
+  padding: 8px;
+  font: inherit;
+}
+
+.report-item {
+  border-top: 2px dashed #c9ccb8;
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+.report-reason {
+  font-weight: 800;
+  margin: 4px 0 8px;
+}
+
+
+
+/* ===== 9단계: 리그 생명주기 ===== */
+.past-link {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.past-link p {
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+
+#pastFromLeagueBtn {
+  margin-top: 12px;
+  margin-left: 6px;
+}
+
+.lifecycle-box {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 3px dashed var(--ink);
+}
+
+.danger-zone {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 2px dashed #c9ccb8;
+}
+/* 위험 영역의 버튼과 그 아래 설명이 붙지 않게 */
+.danger-zone .btn-leave {
+  margin-bottom: 10px;
+}
+.danger-zone .hint {
+  margin: 0;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.remove-btn {
+  margin-top: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #b8452f;
+}
+
+.past-item h3 {
+  margin-top: 0;
+}
+

@@ -1,0 +1,207 @@
+/* 06-modal-notes.css · 확인 창, 오답 노트 */
+
+/* ===== 확인 창 (모달) ===== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(31, 42, 26, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.modal-backdrop.hidden {
+  display: none;
+}
+
+.modal {
+  width: 100%;
+  max-width: 360px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: 26px 22px 22px;
+  text-align: center;
+  animation: modal-pop 0.15s ease-out;
+}
+
+@keyframes modal-pop {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.modal-icon {
+  font-size: 30px;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  background: var(--yellow-soft);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-title {
+  margin: 0 0 8px;
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.modal-text {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: #5f6652;
+  line-height: 1.55;
+}
+
+.modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.modal-actions .btn {
+  width: 100%;
+  margin-top: 0;
+  padding: 12px;
+  font-size: 15px;
+}
+
+.btn-danger {
+  background: var(--red);
+}
+
+.btn-danger:hover {
+  background: #bf4f3a;
+}
+
+/* 리그 코드 복사 버튼 */
+.copy-btn {
+  margin: 0 auto 10px;
+  display: inline-block;
+}
+
+/* 처리 중(잠긴) 버튼 */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
+/* 위쪽 바 닉네임: 누르면 닉네임 바꾸기 */
+.nickname-btn {
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.nickname-btn:hover {
+  background: #e0d955;
+}
+
+.modal input {
+  margin: 0 0 6px;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ===== 오답 노트 바로가기 카드 ===== */
+.study-tools {
+  margin-top: 18px;
+}
+
+
+
+/* 채점 카드의 객관식 보기 */
+.answer-choices {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.answer-choices li {
+  padding: 8px 10px;
+  border: 2px solid #c9ccb8;
+  border-radius: 7px;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.answer-choices li.is-answer {
+  border-color: var(--grass-dark);
+  background: #e7f1dc;
+  font-weight: 800;
+}
+
+.answer-choices li.is-mine {
+  border-color: var(--red);
+  background: #fbe4df;
+}
+
+/* 오답 노트 */
+.note-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+  margin-top: 12px;
+}
+
+.note-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  white-space: nowrap; /* "과목"이 한 글자씩 줄바꿈되지 않게 */
+}
+
+.note-filter select {
+  width: auto; /* 기본 select는 100%라서 옆 글자를 밀어낸다 */
+  margin-top: 0; /* 옆 글자와 높이를 맞춘다 */
+  padding: 8px 10px;
+  border: 3px solid var(--ink);
+  border-radius: 7px;
+  font-size: 15px;
+  background: #fff;
+}
+
+.note-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.note-toggle input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+.result-block.known {
+  opacity: 0.6;
+}
+
+.known-btn {
+  margin-top: 6px;
+}
+
+.empty-card {
+  text-align: center;
+}
+
+.empty-card p {
+  font-weight: 700;
+  margin: 0 0 14px;
+}
+
+

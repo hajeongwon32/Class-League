@@ -1,0 +1,437 @@
+/* 10-screens.css · 관리자 메뉴 탭, 종료 희망일 달력, 넓은 화면 정리, 고르기 카드, 학생 리그 정보 */
+
+/* ===== 관리자 메뉴 탭 (진행 중·끝난 리그) ===== */
+.admin-tabs {
+  order: 2; /* 리그 이름 카드 바로 아래 */
+  display: flex;
+  gap: 8px;
+  overflow-x: auto; /* 휴대폰에서 탭이 많으면 옆으로 밀어서 본다 */
+  padding: 4px 4px 8px;
+  position: sticky; /* 아래로 내려도 탭은 위에 붙어 있다 */
+  top: 0;
+  z-index: 5;
+  background: var(--cream);
+  scrollbar-width: thin;
+}
+.admin-tab {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font: inherit;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.admin-tab:hover {
+  background: var(--yellow-soft);
+}
+.admin-tab[aria-selected="true"] {
+  background: var(--grass);
+  color: #fff;
+  box-shadow: 1px 1px 0 var(--ink);
+  transform: translate(2px, 2px);
+}
+.admin-tab:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 2px;
+}
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  margin-left: 4px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+}
+.tab-hide {
+  display: none !important;
+}
+
+/* 탭을 쓰는 관리자 화면: 한 칸으로, 읽기 좋은 폭(900px)으로 가운데 */
+@media (min-width: 960px) {
+  #leagueView.tabs-on > .card,
+  #leagueView.tabs-on > .admin-tabs,
+  #leagueView.tabs-on > .league-cols {
+    width: 100%;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #leagueView.tabs-on .league-cols {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* 카드를 900px 폭에 꽉 차게 (두 칸 배치의 start를 덮어쓴다) */
+    gap: 20px;
+  }
+  /* 두 칸 상자를 없애고 고른 탭의 카드만 한 줄로 */
+  #leagueView.tabs-on .league-main,
+  #leagueView.tabs-on .league-side {
+    display: contents;
+  }
+}
+/* 순위·정답률 탭: 순위표를 먼저 */
+/* 관리자 탭 화면: 순위표는 늘 보이고(학생 이름을 누르면 그 학생 화면), 참가자 카드는 순위표와 겹쳐서 숨긴다 */
+#leagueView.tabs-on #membersCard {
+  display: none;
+}
+.standings .member-link {
+  font-weight: 800;
+}
+
+/* 신고: 한 줄 요약, 누르면 펼쳐짐 */
+.report-item {
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 0;
+  margin-top: 10px;
+  background: var(--paper);
+}
+.report-item[open] {
+  background: #fffdf2;
+}
+.report-item > :not(summary) {
+  margin-left: 14px;
+  margin-right: 14px;
+}
+.report-item > :last-child {
+  margin-bottom: 14px;
+}
+.report-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  list-style-position: inside;
+}
+.report-summary:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 2px;
+}
+.report-sum-round {
+  font-weight: 800;
+  color: var(--grass-dark);
+}
+.report-sum-reason {
+  font-weight: 800;
+}
+.report-sum-who {
+  color: #6b7256;
+  font-size: 13px;
+}
+.report-sum-result {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 800;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 1px 8px;
+  background: var(--yellow-soft);
+}
+.more-btn {
+  display: block;
+  margin: 12px auto 0;
+}
+#reportCard .report-done {
+  margin-top: 18px; /* [무효]·[문제없음] 버튼과 겹치지 않게 */
+}
+.progress-legend {
+  font-size: 12.5px;
+}
+/* 휴대폰: 탭을 옆으로 숨기지 않고 두 줄로 모두 보이게 */
+@media (max-width: 560px) {
+  .admin-tabs {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    gap: 6px;
+  }
+  .admin-tab {
+    font-size: 14px;
+    padding: 6px 12px;
+  }
+}
+
+/* 관리자 순위표: 행 전체가 눌리고, 마우스를 올리면 살짝 어두워진다 */
+.standings tr.row-link {
+  cursor: pointer;
+}
+.standings tr.row-link:hover td,
+.standings tr.row-link:focus-within td {
+  /* 원래 칸 색(1등·상품 칸 등) 위에 어두운 막을 덮어 같은 느낌으로 어두워진다 */
+  box-shadow: inset 0 0 0 999px rgba(31, 42, 26, 0.04);
+}
+.standings tr.row-link .member-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 입력 칸 오류: 칸을 빨갛게, 바로 아래에 이유 */
+.input-err {
+  border-color: var(--red) !important;
+  background: #fff1ee;
+}
+.field-err {
+  flex: 1 1 100%;
+  margin: -2px 0 2px;
+  color: #b23a24;
+  font-size: 13.5px;
+  font-weight: 800;
+}
+.field-err::before {
+  content: "⚠️ ";
+}
+
+/* [+ 과목 추가]: 5개가 되면 흐리게, 바로 아래에 안내 */
+#addSubjectBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.limit-note {
+  margin: 6px 0 0;
+  color: #8a6d12;
+  font-size: 13.5px;
+  font-weight: 800;
+}
+.limit-note::before {
+  content: "ℹ️ ";
+}
+
+/* ===== 리그 종료 희망일: 칸 전체를 눌러 달력 열기 ===== */
+.end-date-wrap {
+  margin-top: 12px;
+}
+.date-field {
+  position: relative;
+  cursor: pointer;
+}
+.date-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  pointer-events: none;
+}
+.date-field input[type="date"] {
+  width: 100%;
+  margin: 0;
+  padding: 12px 14px 12px 46px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper);
+  cursor: pointer;
+}
+.date-field:hover input[type="date"] {
+  background: var(--yellow-soft);
+}
+.date-field input[type="date"]:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 2px;
+}
+/* 크롬의 작은 달력 아이콘을 칸 전체로 넓혀서 어디를 눌러도 열리게 */
+.date-field input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  opacity: 0;
+  cursor: pointer;
+}
+.date-text {
+  margin: 6px 0 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--grass-dark);
+}
+.date-text.bad {
+  color: #b23a24;
+}
+.date-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.date-quick .btn {
+  margin: 0;
+}
+.date-quick .btn[aria-pressed="true"] {
+  background: var(--grass);
+  color: #fff;
+}
+
+/* ===== 넓은 화면: 로그인·고르기·코드 입력은 좁고 단정하게 가운데 ===== */
+@media (min-width: 960px) {
+  #authView,
+  #joinView {
+    max-width: 460px;
+    margin-top: 5vh;
+  }
+  #chooseView {
+    max-width: 760px;
+    margin-top: 5vh;
+  }
+  /* 리그 만들기: 두 칸이지만 전체 폭을 줄여 비율을 맞춘다 */
+  #createView {
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* 학생/관리자 카드: 필요한 것 한 줄 */
+.portal-need {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  padding: 3px 10px;
+  margin-top: 2px;
+}
+/* 두 카드의 [들어가기]/[만들기]를 맨 아래에 맞춘다 */
+.portal-go {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+/* ===== 학생/관리자 고르기 카드: 꾸밈을 줄이고 글 위주로 ===== */
+.portal {
+  gap: 4px;
+  padding: 22px 22px 20px;
+  color: var(--ink);
+}
+.portal-student {
+  background: #fbf6c9;
+}
+.portal-admin {
+  background: #d9e8f7;
+}
+.portal-role {
+  font-size: 14px;
+  font-weight: 800;
+  color: #5f6652;
+}
+.portal .portal-name {
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+.portal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 10px;
+  padding-left: 18px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+.portal-list > span {
+  display: list-item;
+  list-style: disc;
+}
+.portal .portal-need {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5f6652;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  margin: 0 0 14px;
+}
+.portal .portal-go {
+  margin-top: auto;
+  width: 100%;
+  text-align: center;
+  padding: 10px 12px;
+  border: 3px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 900;
+}
+.portal:hover .portal-go {
+  background: var(--yellow);
+}
+.portal:focus-visible {
+  outline: 4px solid var(--red);
+  outline-offset: 3px;
+}
+/* 위쪽 안내 카드는 짧게 */
+#chooseView .choose-head {
+  padding: 18px 22px;
+}
+#chooseView .choose-head h2 {
+  margin: 0 0 6px;
+}
+#chooseView .choose-head .hint {
+  margin: 0;
+  font-size: 14.5px;
+  color: #4a5240;
+}
+
+/* ===== 리그 정보 (학생, 모집 중) ===== */
+.info-list {
+  margin: 10px 0 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 14px;
+}
+.info-list dt {
+  font-weight: 800;
+  color: #5f6652;
+  font-size: 14px;
+}
+.info-list dd {
+  margin: 0;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* 모집 중 학생 화면: 두 칸 구조를 끄고 가운데 한 칸으로 (참가자 카드가 오른쪽으로 치우치지 않게) */
+@media (min-width: 960px) {
+  #leagueView.recruiting-solo > .card,
+  #leagueView.recruiting-solo > .league-cols {
+    width: 100%;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #leagueView.recruiting-solo .league-cols {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+  #leagueView.recruiting-solo .league-main,
+  #leagueView.recruiting-solo .league-side {
+    display: contents;
+  }
+  /* 모든 카드를 같은 640px로 가운데 (리그 이름 카드 포함) */
+  #leagueView.recruiting-solo > .card {
+    width: 100%;
+  }
+}
+
