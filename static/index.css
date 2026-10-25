@@ -1090,9 +1090,12 @@ select {
   align-items: center;
   gap: 8px;
   font-weight: 700;
+  white-space: nowrap; /* "과목"이 한 글자씩 줄바꿈되지 않게 */
 }
 
 .note-filter select {
+  width: auto; /* 기본 select는 100%라서 옆 글자를 밀어낸다 */
+  margin-top: 0; /* 옆 글자와 높이를 맞춘다 */
   padding: 8px 10px;
   border: 3px solid var(--ink);
   border-radius: 7px;
