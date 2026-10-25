@@ -80,7 +80,11 @@ pytest
 
 | 파일 | 하는 일 |
 |---|---|
-| `app.py` | 서버, DB, API, 대진·마감·순위 계산 |
+| `app.py` | 서버 진입점: 앱 설정, 로그인·API 연결, 오류 안내 |
+| `classleague/db.py` · `clock.py` · `inputs.py` | DB 연결과 표, 시각(KST/UTC), 요청 입력 읽기 |
+| `classleague/schedule.py` · `standings.py` | 대진표·일정 계산, 순위 계산 (DB 없이 계산만) |
+| `classleague/engine.py` · `league_state.py` | 마감 자동 처리(몰수)·채점·결과 재계산, 리그 상태 조회 |
+| `classleague/routes/` | API: 로그인(`auth`), 리그(`leagues`), 경기(`matches`), 관리자(`admin`), 신고(`reports`), 오답 노트(`notes`) |
 | `templates/index.html` | 화면 |
 | `static/index.js` · `static/index.css` | 화면 동작과 모양 |
 | `static/sw.js` · `static/manifest.webmanifest` | 홈 화면 설치, 오프라인 안내 |
