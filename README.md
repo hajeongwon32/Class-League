@@ -86,8 +86,9 @@ pytest
 | `classleague/schedule.py` · `standings.py` | 대진표·일정 계산, 순위 계산 (DB 없이 계산만) |
 | `classleague/engine.py` · `league_state.py` | 마감 자동 처리(몰수)·채점·결과 재계산, 리그 상태 조회 |
 | `classleague/routes/` | API: 로그인(`auth`), 리그(`leagues`), 경기(`matches`), 관리자(`admin`), 신고(`reports`), 오답 노트(`notes`) |
-| `templates/index.html` | 화면 |
-| `static/index.js` · `static/index.css` | 화면 동작과 모양 |
+| `templates/index.html` | 화면 뼈대. 화면마다 `templates/partials/`(처음 화면, 로그인, 리그 홈, 문제 만들기, 오답 노트 …)를 붙인다 |
+| `static/css/01-base.css` ~ `11-extras.css` | 화면 모양. 번호 순서대로 불러온다 (기본 → 리그 → 문제 → … → 화면 배치) |
+| `static/js/01-core.js` ~ `11-notes.js` | 화면 동작. 번호 순서대로 불러온다 (공통 도구 → 로그인 → 리그 홈 → … → 오답 노트) |
 | `static/sw.js` · `static/manifest.webmanifest` | 홈 화면 설치, 오프라인 안내 |
 | `docs/SPEC.md` | 기능 정의서, 화면, 규칙과 예외 상황, 완료 기준 |
 | `tests/` | 자동 테스트: 대진·일정 계산, 경기 흐름, 권한·이상한 입력, 신고·리그 생명주기 |
