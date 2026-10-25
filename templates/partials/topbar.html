@@ -1,0 +1,14 @@
+{# 위쪽 바: 로고, 로그인/회원가입 또는 닉네임·로그아웃 #}
+<header class="topbar">
+  <div class="brand">🏆 Class League</div>
+  <!-- 로그인 안 했을 때: 로그인/회원가입 버튼 -->
+  <div id="guestArea" class="user-area">
+    <button id="navLoginBtn" class="btn btn-small">로그인</button>
+    <button id="navRegisterBtn" class="btn btn-small">회원가입</button>
+  </div>
+  <!-- 로그인 했을 때: 닉네임 + 로그아웃 -->
+  <div id="userArea" class="user-area hidden">
+    <button type="button" id="nicknameBtn" class="nickname nickname-btn" title="닉네임 바꾸기"><span id="navNickname"></span> ✏️</button>
+    <button id="logoutBtn" class="btn btn-small">로그아웃</button>
+  </div>
+</header>

@@ -1,0 +1,18 @@
+{# 관리자: 학생이 만든 문제 보기 #}
+<!-- 관리자: 학생이 만든 문제 보기 (F16-2) -->
+<section id="studentQView" class="hidden">
+  <div class="card">
+    <div class="league-head">
+      <h2 id="studentQTitle">📝 학생이 만든 문제</h2>
+      <button type="button" class="btn btn-small back-home">← 뒤로가기</button>
+    </div>
+    <p class="hint">끝난 경기의 문제만 볼 수 있어요. ⭕/❌는 상대가 맞혔는지예요. 상대가 실제로 쓴 답과 학생 오답 노트는 보이지 않아요.</p>
+    <p id="studentQSummary" class="setting-summary"></p>
+    <!-- 관리자 + 진행 중: 전학 등으로 빠지는 학생 내보내기 -->
+    <div id="studentRemoveBox" class="danger-zone hidden">
+      <button type="button" id="studentRemoveBtn" class="btn btn-small btn-leave">이 학생 내보내기</button>
+      <p class="hint">전학 등으로 빠질 때만 써요. 되돌릴 수 없어요.</p>
+    </div>
+  </div>
+  <div id="studentQList"></div>
+</section>

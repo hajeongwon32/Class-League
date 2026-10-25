@@ -1,0 +1,119 @@
+{# 관리자: 리그 만들기 (설정 고치기에도 같이 쓴다) #}
+<!-- (가-3) 관리자: 리그 만들기 (설정 고치기에도 같이 쓴다) -->
+<div id="createView" class="hidden">
+  <button type="button" class="btn-small btn back-link back-choose">← 뒤로가기</button>
+  <div class="card">
+    <h2 id="createTitle">리그 만들기 📋</h2>
+    <p class="hint">① → ④ 순서로 채우면 돼요. 리그를 만들면 학생들에게 알려 줄 6자리 코드가 나와요.</p>
+  </div>
+  <form id="createForm" novalidate>
+    <!-- ① 리그 정보 -->
+    <div class="card step-card">
+      <h3 class="step-title"><span class="step-badge">1</span> 리그 정보</h3>
+      <label class="subject-label" for="leagueName">리그 이름</label>
+      <input type="text" id="leagueName" maxlength="30" placeholder="예: 1학년 3반 리그" />
+      <div class="subject-label">과목 · 문제 수 · 기본 출제 범위 <small>(과목 5개까지, 과목마다 1~10문제)</small></div>
+      <p class="hint">문제 수는 학생이 라운드마다 상대에게 낼 개수예요(처음에는 1~2문제 추천). 기본 출제 범위는 예: "중간고사 범위", "교과서 3~4과". 제한하지 않으려면 "자유 출제". 리그가 시작되면 라운드마다 범위를 따로 정할 수도 있어요.</p>
+      <div id="subjectRows"></div>
+      <button type="button" id="addSubjectBtn" class="btn-small btn">+ 과목 추가</button>
+      <p id="subjectLimitNote" class="limit-note hidden" aria-live="polite">과목은 5개까지 넣을 수 있어요.</p>
+    </div>
+
+    <!-- ② 리그 기간 -->
+    <div class="card step-card">
+      <h3 class="step-title"><span class="step-badge">2</span> 리그 기간</h3>
+      <fieldset class="mode-picker">
+        <legend class="sr-only">리그 기간 방식</legend>
+        <label class="mode-option">
+          <input type="radio" name="leagueMode" value="full" checked />
+          <span><strong>🏟️ 전체 리그</strong><br /><small>모든 학생과 한 번씩 경기해요. 학기 내내 하는 활동에 좋아요.</small></span>
+        </label>
+        <label class="mode-option">
+          <input type="radio" name="leagueMode" value="short" />
+          <span><strong>📝 시험 대비 단기 리그</strong><br /><small>종료 희망일까지 가능한 라운드만 해요. 같은 상대와 두 번 붙지 않아요.</small></span>
+        </label>
+      </fieldset>
+      <div id="endDateWrap" class="end-date-wrap hidden">
+        <label class="subject-label" for="endDate">리그 종료 희망일 <small>(보통 시험 전날)</small></label>
+        <!-- 칸 어디를 눌러도 달력이 열린다 -->
+        <div class="date-field">
+          <span class="date-icon" aria-hidden="true">📅</span>
+          <input type="date" id="endDate" aria-describedby="endDateText" />
+        </div>
+        <p id="endDateText" class="date-text" aria-live="polite"></p>
+        <div class="date-quick" role="group" aria-label="종료 희망일 빠르게 고르기">
+          <button type="button" class="btn btn-small" data-weeks="2">2주 뒤</button>
+          <button type="button" class="btn btn-small" data-weeks="3">3주 뒤</button>
+          <button type="button" class="btn btn-small" data-weeks="4">4주 뒤</button>
+          <button type="button" class="btn btn-small" data-weeks="6">6주 뒤</button>
+        </div>
+        <small class="field-help">이날 마감 시각까지 완전히 끝나는 라운드만 진행해요</small>
+      </div>
+    </div>
+
+    <!-- ③ 경기 일정 -->
+    <div class="card step-card">
+      <h3 class="step-title"><span class="step-badge">3</span> 경기 일정</h3>
+      <fieldset class="day-picker">
+        <legend class="subject-label">경기 요일 <small>(1주일에 1~3번)</small></legend>
+        <div id="dayButtons" class="day-buttons"></div>
+        <p class="hint">고른 요일 00:00마다 새 라운드가 시작돼요. 요일끼리는 하루 이상 띄워 주세요.</p>
+        <p id="dayMsg" class="msg err"></p>
+      </fieldset>
+      <div class="time-settings">
+        <label class="subject-label" for="deadlineTime">마감 시각
+          <select id="deadlineTime">
+            <option value="18:00">오후 6시 (18:00)</option>
+            <option value="19:00">오후 7시 (19:00)</option>
+            <option value="20:00">오후 8시 (20:00)</option>
+            <option value="21:00">오후 9시 (21:00)</option>
+            <option value="22:00">오후 10시 (22:00)</option>
+            <option value="23:00">오후 11시 (23:00)</option>
+            <option value="23:59" selected>밤 11시 59분 (23:59)</option>
+          </select>
+          <small class="field-help">문제 만들기·풀기 마감이 이 시각이에요</small>
+        </label>
+        <label class="subject-label" for="makeDays">문제 만들기 기간
+          <select id="makeDays"></select>
+          <small class="field-help">나머지 날은 상대 문제를 푸는 기간이에요</small>
+        </label>
+      </div>
+      <p id="settingSummary" class="setting-summary" aria-live="polite"></p>
+    </div>
+
+    <!-- 📅 일정 미리 보기 (F4-1): ②를 바꾸면 바로 다시 계산 -->
+    <div class="card step-card preview-card">
+      <div class="preview-head">
+        <h3 class="step-title">📅 이렇게 진행돼요</h3>
+        <label class="preview-count">예상 학생 수
+          <input type="number" id="previewCount" min="2" max="30" value="20" inputmode="numeric" />명
+        </label>
+      </div>
+      <div id="createPreview" class="preview-summary" aria-live="polite"></div>
+      <details class="preview-details">
+        <summary>라운드별 날짜·마감 시각 모두 보기</summary>
+        <div class="table-wrap"><table class="round-table">
+          <caption class="sr-only">라운드별 문제 만들기·풀기 마감</caption>
+          <thead><tr><th scope="col">라운드</th><th scope="col">✏️ 문제 만들기</th><th scope="col">🎯 문제 풀기</th></tr></thead>
+          <tbody id="createPreviewList"></tbody>
+        </table></div>
+      </details>
+      <p class="hint">미리 보기라 저장되지 않아요. 첫 경기 날짜는 학생이 다 들어온 뒤 [리그 시작]을 누를 때 골라요.</p>
+    </div>
+
+    <!-- ③ 상품 (선택) -->
+    <div class="card step-card">
+      <details id="rewardDetails" class="reward-details">
+        <summary class="step-title"><span class="step-badge">4</span> 상품 <small>(선택, 안 해도 돼요)</small></summary>
+        <p class="hint">최종 순위에 따라 줄 상품이에요. 예: 1등 "치킨", 2~3등 "숙제 면제". 순위표에서 상품마다 다른 색으로 표시돼요.</p>
+        <div id="rewardRows"></div>
+        <button type="button" id="addRewardBtn" class="btn-small btn">+ 상품 추가</button>
+      </details>
+    </div>
+
+    <div class="card">
+      <button type="submit" id="createSubmitBtn" class="btn">리그 만들기</button>
+      <p id="createMsg" class="msg" aria-live="polite"></p>
+    </div>
+  </form>
+</div>

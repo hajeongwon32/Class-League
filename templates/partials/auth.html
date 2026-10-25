@@ -1,0 +1,40 @@
+{# 로그인·회원가입 #}
+<!-- 로그인 전 화면 -->
+<section id="authView" class="hidden">
+  <button id="authBackBtn" class="btn-small btn back-link">← 뒤로가기</button>
+
+  <!-- 탭 버튼 -->
+  <div class="tabs">
+    <button id="tabLogin" class="tab active">로그인</button>
+    <button id="tabRegister" class="tab">회원가입</button>
+  </div>
+
+  <!-- 로그인 폼 -->
+  <form id="loginForm" class="card">
+    <h2>로그인</h2>
+    <label>아이디
+      <input type="text" id="loginUsername" autocomplete="username" />
+    </label>
+    <label>비밀번호
+      <input type="password" id="loginPassword" autocomplete="current-password" />
+    </label>
+    <button type="submit" class="btn">로그인</button>
+    <p id="loginMsg" class="msg"></p>
+  </form>
+
+  <!-- 회원가입 폼 -->
+  <form id="registerForm" class="card hidden">
+    <h2>회원가입</h2>
+    <label>아이디 <small>(영문·숫자 4~20자, 로그인할 때만 써요. 친구에게는 안 보여요)</small>
+      <input type="text" id="regUsername" autocomplete="username" />
+    </label>
+    <label>비밀번호 <small>(8~64자)</small>
+      <input type="password" id="regPassword" autocomplete="new-password" />
+    </label>
+    <label>닉네임 <small>(1~10자, 순위표에 보이는 이름이에요. 나중에 바꿀 수 있어요)</small>
+      <input type="text" id="regNickname" maxlength="10" placeholder="예: 김민준, 수학왕" />
+    </label>
+    <button type="submit" class="btn">가입하기</button>
+    <p id="registerMsg" class="msg"></p>
+  </form>
+</section>

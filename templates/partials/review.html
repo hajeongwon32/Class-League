@@ -1,0 +1,17 @@
+{# 지난 경기 상세 다시 보기 #}
+<!-- 지난 경기 상세 다시 보기 (F13) -->
+<section id="reviewView" class="hidden">
+  <div class="card">
+    <div class="league-head">
+      <h2 id="reviewTitle">📜 지난 경기 다시 보기</h2>
+      <button type="button" id="reviewBackBtn" class="btn btn-small">← 뒤로가기</button>
+    </div>
+    <p id="reviewSummary" class="result-score"></p>
+    <p id="reviewForfeit" class="forfeit-reason hidden"></p>
+    <ul id="reviewScopes" class="scope-list"></ul>
+  </div>
+  <div id="reviewList"></div>
+  <div id="reviewEmpty" class="card empty-card hidden">
+    <p>다시 볼 문제가 없어요. 만들기 단계에서 몰수된 경기일 수 있어요.</p>
+  </div>
+</section>

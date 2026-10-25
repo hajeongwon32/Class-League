@@ -1,0 +1,38 @@
+{# 지난 리그 목록과 지난 리그 하나 #}
+<!-- 지난 리그 목록 (F15) -->
+<section id="pastView" class="hidden">
+  <div class="card">
+    <div class="league-head">
+      <h2>📚 지난 리그</h2>
+      <button type="button" class="btn btn-small back-home">← 뒤로가기</button>
+    </div>
+    <p class="hint">보관하거나 닫은 리그의 최종 결과와 내 경기 기록을 다시 볼 수 있어요. 오답 노트는 리그를 보관해도 그대로 남아요.</p>
+  </div>
+  <div id="pastList"></div>
+</section>
+
+<!-- 지난 리그 하나 -->
+<section id="pastDetailView" class="hidden">
+  <div class="card final-card">
+    <div class="league-head">
+      <h2 id="pastTitle">📚 지난 리그</h2>
+      <button type="button" id="pastDetailBack" class="btn btn-small">← 지난 리그 목록</button>
+    </div>
+    <p id="pastWinner" class="final-winner"></p>
+    <p id="pastMyRank" class="final-my-rank"></p>
+    <div id="pastAwards" class="final-awards"></div>
+  </div>
+  <div class="card">
+    <h3>🏆 최종 순위</h3>
+    <p id="pastRule" class="hint"></p>
+    <div class="table-wrap"><table class="standings">
+      <thead id="pastHead"></thead>
+      <tbody id="pastBody"></tbody>
+    </table></div>
+  </div>
+  <div id="pastHistoryCard" class="card hidden">
+    <h3>📜 내 경기 기록</h3>
+    <p id="pastHistoryEmpty" class="hint hidden">경기 기록이 없어요.</p>
+    <ul id="pastHistoryList" class="history-list"></ul>
+  </div>
+</section>

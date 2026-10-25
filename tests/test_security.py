@@ -125,13 +125,36 @@ def test_html_has_no_inline_script_or_style():
     """보안 정책(CSP)이 막지 않도록 화면 파일에 인라인 스크립트·style 속성을 두지 않는다."""
     import os
     import re
+    import glob
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    for path in ("templates/index.html", "static/offline.html"):
-        html = open(os.path.join(root, path), encoding="utf-8").read()
+    paths = glob.glob(os.path.join(root, "templates", "**", "*.html"), recursive=True)
+    paths.append(os.path.join(root, "static", "offline.html"))
+    assert len(paths) > 2, "화면 조각(templates/partials)도 검사해야 한다"
+    for path in paths:
+        html = open(path, encoding="utf-8").read()
         assert not re.search(r"\sstyle=\"", html), path
         assert not re.search(r"\son[a-z]+=\"", html), path
         assert not re.search(r"<script(?![^>]*\bsrc=)", html), path
         assert "<style" not in html, path
+
+
+def test_page_loads_every_file_it_needs(app):
+    """화면(HTML·CSS·JS)을 여러 파일로 나눴으니, 첫 화면과 서비스 워커가 부르는 파일이 모두 있어야 한다."""
+    import re
+    c = app.test_client()
+    page = c.get("/").get_data(as_text=True)
+    refs = re.findall(r'(?:href|src)="(/static/[^"]+)"', page)
+    assert any("/static/css/" in r for r in refs) and any("/static/js/" in r for r in refs)
+    sw = c.get("/sw.js").get_data(as_text=True)
+    shell = re.findall(r'"(/static/[^"]+)"', sw)
+    offline = c.get("/static/offline.html").get_data(as_text=True)
+    refs += shell + re.findall(r'(?:href|src)="(/static/[^"]+)"', offline)
+    for url in sorted(set(refs)):
+        assert c.get(url).status_code == 200, url
+    # 서비스 워커는 첫 화면이 부르는 CSS·JS를 모두 저장해 둬야 오프라인 안내가 제대로 보인다
+    for url in refs:
+        if url.endswith((".css", ".js")) and "offline" not in url:
+            assert url in shell, f"서비스 워커 목록에 없음: {url}"
 
 
 def _cookies(response):

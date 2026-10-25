@@ -1,0 +1,131 @@
+{# 처음 화면(로그인 전): 소개와 예시 화면 #}
+<!-- 랜딩 화면 (로그인 전 첫 화면) -->
+<section id="landingView">
+  <div class="landing">
+    <div class="landing-logo">
+      <span class="logo-mark">🏆</span>
+      <span class="logo-text">Class League</span>
+    </div>
+    <h1 class="landing-title">공부를 리그로.</h1>
+    <p class="landing-sub">
+      반 친구들과 서로 문제를 내고 풀어 승점을 쌓아요.<br />
+      경기마다 상대가 바뀌는 1:1 대결로 순위를 겨뤄요.
+    </p>
+    <ol class="steps">
+      <li><span class="step-num">1</span><span><strong>입장</strong><br />관리자는 리그를 만들고, 학생은 코드로 들어와요</span></li>
+      <li><span class="step-num">2</span><span><strong>문제 만들기</strong><br />이번 상대에게 낼 문제·정답·해설을 만들어요</span></li>
+      <li><span class="step-num">3</span><span><strong>풀고 승점</strong><br />상대 문제를 풀면 바로 채점되고 순위에 반영돼요</span></li>
+    </ol>
+    <div class="landing-actions">
+      <button id="landingLoginBtn" class="btn">로그인</button>
+      <button id="landingRegisterBtn" class="btn btn-outline">회원가입</button>
+    </div>
+  </div>
+
+  <!-- 처음 화면: 가입 전에 실제 앱 화면을 예시로 보여 준다 (서버 데이터 없이 그린 그림, 누를 수 없음) -->
+  <section class="landing-preview" aria-labelledby="previewTitle">
+    <h2 id="previewTitle" class="preview-title">이런 화면으로 경기해요</h2>
+    <p class="preview-sub">아래는 예시 화면이에요. 실제 리그에서는 우리 반 친구들과 직접 만든 문제가 나와요.</p>
+
+    <div class="preview-grid">
+      <figure class="preview-item">
+        <figcaption><span class="step-num">1</span>이번 경기: 상대·출제 범위·마감을 한눈에</figcaption>
+        <div class="card preview-frame">
+          <h3>⚔️ 이번 경기</h3>
+          <p class="opponent">1라운드 상대: <strong>하준</strong></p>
+          <p class="match-task">✏️ 상대에게 낼 문제를 만들 차례예요</p>
+          <p class="match-deadline">✏️ 만들기 마감: 10월 26일(월) 22:00</p>
+          <p class="countdown">마감까지 23시간 32분</p>
+          <ul class="scope-list">
+            <li class="scope-title">📖 1라운드 출제 범위</li>
+            <li><strong>수학</strong> 이차방정식</li>
+            <li><strong>영어</strong> Lesson 3</li>
+          </ul>
+          <span class="btn preview-btn">✏️ 문제 만들기</span>
+        </div>
+      </figure>
+
+      <figure class="preview-item">
+        <figcaption><span class="step-num">2</span>제출하면 바로 채점, 정답·해설 확인</figcaption>
+        <div class="preview-stack">
+          <p class="wrong-note-result">🎯 2문제 중 1개 맞혔어요 · 틀린 문제는 오답 노트에 담았어요</p>
+          <div class="card result-block correct">
+            <div class="q-title">[수학]</div>
+            <div class="result-q">1. x² = 4의 양의 근은?</div>
+            <p class="result-mark">⭕ 정답</p>
+            <ul class="answer-choices">
+              <li>1. 1</li>
+              <li class="is-answer">2. 2  ← 정답 · 내 답</li>
+              <li>3. 4</li>
+            </ul>
+          </div>
+          <div class="card result-block wrong">
+            <div class="q-title">[영어]</div>
+            <div class="result-q">2. ‘사과’를 영어로 쓰면?</div>
+            <p class="result-mark">❌ 오답</p>
+            <p class="result-line">내 답: aple · 정답: apple</p>
+            <p class="result-expl">해설: p를 두 번 써요. apple</p>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="preview-item">
+        <figcaption><span class="step-num">3</span>승 3·무 1·패 0, 순위와 상품이 자동으로</figcaption>
+        <div class="card preview-frame">
+          <h3>🏆 순위표</h3>
+          <p class="hint">전체 리그 · 총 승점 → 득실차 → 맞힌 문제 수 순</p>
+          <div class="table-wrap"><table class="standings">
+            <thead><tr><th scope="col">순위</th><th scope="col">닉네임</th><th scope="col">경기</th><th scope="col">승</th><th scope="col">무</th><th scope="col">패</th><th scope="col">득실</th><th scope="col" class="pts">승점</th></tr></thead>
+            <tbody>
+              <tr><td class="rank-reward prize-blue">1</td><td>민수</td><td>3</td><td>2</td><td>1</td><td>0</td><td>+4</td><td class="pts">7</td></tr>
+              <tr class="me"><td class="rank-reward prize-green">2</td><td>지아</td><td>3</td><td>2</td><td>0</td><td>1</td><td>+2</td><td class="pts">6</td></tr>
+              <tr><td class="rank-reward prize-green">3</td><td>하준</td><td>3</td><td>1</td><td>1</td><td>1</td><td>0</td><td class="pts">4</td></tr>
+              <tr><td>4</td><td>서연</td><td>3</td><td>0</td><td>0</td><td>3</td><td>-6</td><td class="pts">0</td></tr>
+            </tbody>
+          </table></div>
+          <div class="reward-legend">
+            <div class="legend-chip"><span class="legend-swatch prize-blue" aria-hidden="true"></span><span>1등 · 치킨</span></div>
+            <div class="legend-chip"><span class="legend-swatch prize-green" aria-hidden="true"></span><span>2~3등 · 아이스크림</span></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="preview-item">
+        <figcaption><span class="step-num">4</span>틀린 문제는 오답 노트에 저절로 모여요</figcaption>
+        <div class="card wrong-note-card preview-frame">
+          <div class="wrong-note-head">
+            <h3>📒 오답 노트 <span class="wrong-note-badge">3</span></h3>
+            <span class="wrong-note-label">틀린 문제 복습</span>
+          </div>
+          <p class="hint">시험 전에 과목별로 다시 보고, 알게 된 문제는 정리해요.</p>
+          <div class="card result-block wrong">
+            <div class="q-title">[영어] · 1라운드 · vs 하준</div>
+            <div class="result-q">‘사과’를 영어로 쓰면?</div>
+            <p class="result-line">내 답: aple · 정답: apple</p>
+            <span class="btn btn-small preview-btn known-btn">이제 알아요 ✅</span>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="preview-item preview-wide">
+        <figcaption><span class="step-num">👩‍🏫</span>선생님은 진행 상황만 보고, 대진·마감·채점은 앱이 해요</figcaption>
+        <div class="card preview-frame">
+          <h3>📋 2라운드 진행 상황</h3>
+          <p class="setting-summary">2 / 3라운드 · 아직 [완성] 안 한 학생 1명</p>
+          <div class="table-wrap"><table class="round-table progress-table">
+            <thead><tr><th scope="col">학생</th><th scope="col">✏️ 완성</th><th scope="col">🎯 제출</th><th scope="col">상대</th><th scope="col">✏️ 완성</th><th scope="col">🎯 제출</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">민수</th><td>✅</td><td>⏳</td><th scope="row">서연</th><td>⏳</td><td>⏳</td></tr>
+              <tr><th scope="row">지아</th><td>✅</td><td>⏳</td><th scope="row">하준</th><td>✅</td><td>⏳</td></tr>
+            </tbody>
+          </table></div>
+          <p class="hint">진행 중인 경기의 문제와 정답은 선생님도 볼 수 없어요. 마감을 넘기면 몰수 처리도 자동이에요.</p>
+        </div>
+      </figure>
+    </div>
+
+    <div class="landing-actions preview-cta">
+      <button id="previewRegisterBtn" class="btn btn-outline">회원가입하고 리그 시작하기</button>
+    </div>
+  </section>
+</section>
