@@ -64,7 +64,14 @@ pip install -r requirements.txt
 echo "SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_hex(32))')" > .env
 flask --app app run --port 5000
 ```
-브라우저에서 http://localhost:5000 을 열어요. 데이터베이스(`app.db`)는 처음 실행할 때 자동으로 만들어져요.
+브라우저에서 http://localhost:5000 을 열어요. 데이터베이스(`app.db`)는 처음 실행할 때 `app.py` 옆에 자동으로 만들어져요.
+
+### 테스트
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+진짜 `app.db`는 건드리지 않고 시험마다 빈 DB를 새로 만들어요. 시계를 앞으로 돌려 마감·몰수·리그 종료까지 확인해요.
 
 ## 만든 기술과 파일
 - 서버: Python 3.12, Flask, SQLite, Flask-Login, Flask-Bcrypt
@@ -78,3 +85,4 @@ flask --app app run --port 5000
 | `static/index.js` · `static/index.css` | 화면 동작과 모양 |
 | `static/sw.js` · `static/manifest.webmanifest` | 홈 화면 설치, 오프라인 안내 |
 | `docs/SPEC.md` | 기능 정의서, 화면, 규칙과 예외 상황, 완료 기준 |
+| `tests/` | 자동 테스트: 대진·일정 계산, 경기 흐름, 권한·이상한 입력, 신고·리그 생명주기 |
