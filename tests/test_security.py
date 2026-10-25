@@ -110,7 +110,7 @@ def test_too_long_and_html_text(league, clock):
 # ---------- 브라우저 쪽 보안 설정 (classleague/security.py) ----------
 def test_security_headers_on_pages_and_api(app):
     c = app.test_client()
-    for url in ("/", "/me", "/static/index.js"):
+    for url in ("/", "/me", "/static/js/01-core.js"):
         h = c.get(url).headers
         csp = h["Content-Security-Policy"]
         assert "script-src 'self'" in csp and "frame-ancestors 'none'" in csp
