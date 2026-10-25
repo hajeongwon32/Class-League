@@ -105,3 +105,66 @@ def test_too_long_and_html_text(league, clock):
     html_q = questions()
     html_q[0]["content"] = "<img src=x onerror=alert(1)>"
     assert a.post(f"/matches/{mid}/my-questions", json={"action": "draft", "questions": html_q}).status_code == 200
+
+
+# ---------- 브라우저 쪽 보안 설정 (classleague/security.py) ----------
+def test_security_headers_on_pages_and_api(app):
+    c = app.test_client()
+    for url in ("/", "/me", "/static/index.js"):
+        h = c.get(url).headers
+        csp = h["Content-Security-Policy"]
+        assert "script-src 'self'" in csp and "frame-ancestors 'none'" in csp
+        assert "unsafe-inline" not in csp and "unsafe-eval" not in csp
+        assert h["X-Frame-Options"] == "DENY"
+        assert h["X-Content-Type-Options"] == "nosniff"
+        assert h["Referrer-Policy"] == "same-origin"
+    assert c.get("/me").headers["Cache-Control"] == "no-store", "API 응답은 기기에 남기지 않는다"
+
+
+def test_html_has_no_inline_script_or_style():
+    """보안 정책(CSP)이 막지 않도록 화면 파일에 인라인 스크립트·style 속성을 두지 않는다."""
+    import os
+    import re
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for path in ("templates/index.html", "static/offline.html"):
+        html = open(os.path.join(root, path), encoding="utf-8").read()
+        assert not re.search(r"\sstyle=\"", html), path
+        assert not re.search(r"\son[a-z]+=\"", html), path
+        assert not re.search(r"<script(?![^>]*\bsrc=)", html), path
+        assert "<style" not in html, path
+
+
+def _cookies(response):
+    return response.headers.getlist("Set-Cookie")
+
+
+def test_login_cookies_are_samesite_httponly_and_secure_on_https(app, new_user):
+    new_user("stu0001", "민수")
+    body = {"username": "stu0001", "password": PASSWORD}
+
+    https = app.test_client()
+    cookies = _cookies(https.post("/login", json=body, base_url="https://localhost"))
+    assert cookies, "로그인하면 세션·로그인 유지 쿠키가 생긴다"
+    for ck in cookies:
+        assert "SameSite=Lax" in ck and "HttpOnly" in ck and "Secure" in ck, ck
+    resp = https.get("/me", base_url="https://localhost")
+    assert resp.get_json()["logged_in"] is True
+    assert "Strict-Transport-Security" in resp.headers
+
+    # 내 컴퓨터에서 http로 켰을 때는 Secure를 붙이지 않아야 로그인이 된다
+    http = app.test_client()
+    for ck in _cookies(http.post("/login", json=body)):
+        assert "Secure" not in ck, ck
+    assert http.get("/me").get_json()["logged_in"] is True
+
+
+def test_https_behind_proxy_also_gets_secure_cookie(app, new_user):
+    new_user("stu0001", "민수")
+    r = app.test_client().post("/login", json={"username": "stu0001", "password": PASSWORD},
+                               headers={"X-Forwarded-Proto": "https"})
+    assert all("Secure" in ck for ck in _cookies(r))
+
+
+def test_too_big_request_is_refused_kindly(app):
+    r = app.test_client().post("/register", data="x" * (3 * 1024 * 1024), content_type="application/json")
+    assert r.status_code == 413 and "error" in r.get_json()

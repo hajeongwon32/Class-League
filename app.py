@@ -6,6 +6,7 @@ Class League 서버 진입점: 앱을 만들고 설정·로그인·화면·API�
 - classleague/db.py · clock.py · inputs.py   DB, 시각(KST/UTC), 요청 입력
 - classleague/schedule.py · standings.py      대진·일정 계산, 순위 계산
 - classleague/engine.py · league_state.py     마감 자동 처리·채점·재계산, 리그 상태 조회
+- classleague/security.py                     로그인 쿠키·보안 헤더
 - classleague/routes/                         API (로그인·리그·경기·관리자·신고·오답 노트)
 """
 
@@ -19,6 +20,7 @@ from werkzeug.exceptions import HTTPException
 from classleague.db import close_db, init_db
 from classleague.routes import BLUEPRINTS
 from classleague.routes.auth import bcrypt, login_manager
+from classleague.security import init_security
 
 load_dotenv()
 
@@ -30,6 +32,7 @@ if not _secret:
     _secret = secrets.token_hex(32)
     print("경고: .env에 SECRET_KEY가 없어 임시 비밀키를 씁니다")
 app.secret_key = _secret
+init_security(app)  # 로그인 쿠키·보안 헤더·요청 크기 제한
 
 bcrypt.init_app(app)
 login_manager.init_app(app)

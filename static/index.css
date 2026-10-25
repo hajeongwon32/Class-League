@@ -3018,3 +3018,28 @@ summary:focus-visible {
     grid-column: 1 / -1;
   }
 }
+
+/* ===== 인라인 style 대신 쓰는 클래스 (보안 정책: style 속성을 쓰지 않는다) ===== */
+#makeQuestionsBtn {
+  margin-top: 14px;
+}
+#solveBtn {
+  margin-top: 10px;
+}
+#leaveBtn {
+  margin-top: 16px;
+}
+.offline-card {
+  margin-top: 40px;
+}
+/* 예시 순위표의 상품 색 (실제 순위표는 index.js의 PRIZE_COLORS와 같은 색) */
+.prize-blue {
+  --prize: #2b6cd4;
+}
+.prize-green {
+  --prize: #1e9e5a;
+}
+.legend-swatch.prize-blue,
+.legend-swatch.prize-green {
+  background: var(--prize);
+}

@@ -107,15 +107,15 @@
               <div class="table-wrap"><table class="standings">
                 <thead><tr><th scope="col">순위</th><th scope="col">닉네임</th><th scope="col">경기</th><th scope="col">승</th><th scope="col">무</th><th scope="col">패</th><th scope="col">득실</th><th scope="col" class="pts">승점</th></tr></thead>
                 <tbody>
-                  <tr><td class="rank-reward" style="--prize:#2b6cd4">1</td><td>민수</td><td>3</td><td>2</td><td>1</td><td>0</td><td>+4</td><td class="pts">7</td></tr>
-                  <tr class="me"><td class="rank-reward" style="--prize:#1e9e5a">2</td><td>지아</td><td>3</td><td>2</td><td>0</td><td>1</td><td>+2</td><td class="pts">6</td></tr>
-                  <tr><td class="rank-reward" style="--prize:#1e9e5a">3</td><td>하준</td><td>3</td><td>1</td><td>1</td><td>1</td><td>0</td><td class="pts">4</td></tr>
+                  <tr><td class="rank-reward prize-blue">1</td><td>민수</td><td>3</td><td>2</td><td>1</td><td>0</td><td>+4</td><td class="pts">7</td></tr>
+                  <tr class="me"><td class="rank-reward prize-green">2</td><td>지아</td><td>3</td><td>2</td><td>0</td><td>1</td><td>+2</td><td class="pts">6</td></tr>
+                  <tr><td class="rank-reward prize-green">3</td><td>하준</td><td>3</td><td>1</td><td>1</td><td>1</td><td>0</td><td class="pts">4</td></tr>
                   <tr><td>4</td><td>서연</td><td>3</td><td>0</td><td>0</td><td>3</td><td>-6</td><td class="pts">0</td></tr>
                 </tbody>
               </table></div>
               <div class="reward-legend">
-                <div class="legend-chip"><span class="legend-swatch" style="background:#2b6cd4" aria-hidden="true"></span><span>1등 · 치킨</span></div>
-                <div class="legend-chip"><span class="legend-swatch" style="background:#1e9e5a" aria-hidden="true"></span><span>2~3등 · 아이스크림</span></div>
+                <div class="legend-chip"><span class="legend-swatch prize-blue" aria-hidden="true"></span><span>1등 · 치킨</span></div>
+                <div class="legend-chip"><span class="legend-swatch prize-green" aria-hidden="true"></span><span>2~3등 · 아이스크림</span></div>
               </div>
             </div>
           </figure>
@@ -440,8 +440,8 @@
               <p id="matchDeadline" class="match-deadline"></p>
               <p id="matchCountdown" class="countdown hidden" aria-live="polite"></p>
               <ul id="matchScopes" class="scope-list hidden" aria-label="이번 라운드 출제 범위"></ul>
-              <button id="makeQuestionsBtn" class="btn" style="margin-top:14px">✏️ 문제 만들기</button>
-              <button id="solveBtn" class="btn btn-outline hidden" style="margin-top:10px">🎯 상대 문제 풀기</button>
+              <button id="makeQuestionsBtn" class="btn">✏️ 문제 만들기</button>
+              <button id="solveBtn" class="btn btn-outline hidden">🎯 상대 문제 풀기</button>
               <p id="matchStatus" class="match-status"></p>
             </div>
 
@@ -572,7 +572,7 @@
               <p id="emptyMembers" class="hint hidden">아직 들어온 학생이 없어요.</p>
               <p id="waitHint" class="hint hidden">⏳ 관리자가 리그를 시작하면 대진표가 나와요.</p>
               <!-- 학생: 리그 나가기 (모집 중일 때만) -->
-              <button id="leaveBtn" class="btn btn-leave hidden" style="margin-top:16px">리그 나가기</button>
+              <button id="leaveBtn" class="btn btn-leave hidden">리그 나가기</button>
               <p id="leaveMsg" class="msg"></p>
             </div>
           </div>
