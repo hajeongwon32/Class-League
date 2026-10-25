@@ -57,6 +57,7 @@
 - 관리자도 진행 중인 경기의 정답, 학생이 입력한 답, 학생 개인 오답 노트는 볼 수 없어요.
 - 비밀번호는 bcrypt로 암호화해서 저장해요. 로그인을 5번 틀리면 1분 동안 잠겨요.
 - 받는 개인정보는 아이디와 닉네임뿐이에요.
+- 로그인 쿠키는 다른 사이트에서 쓸 수 없고, 우리 사이트 파일만 실행되도록 보안 헤더를 붙여요 (`classleague/security.py`).
 
 ## 직접 실행하기
 ```bash
@@ -64,7 +65,14 @@ pip install -r requirements.txt
 echo "SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_hex(32))')" > .env
 flask --app app run --port 5000
 ```
-브라우저에서 http://localhost:5000 을 열어요. 데이터베이스(`app.db`)는 처음 실행할 때 자동으로 만들어져요.
+브라우저에서 http://localhost:5000 을 열어요. 데이터베이스(`app.db`)는 처음 실행할 때 `app.py` 옆에 자동으로 만들어져요.
+
+### 테스트
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+진짜 `app.db`는 건드리지 않고 시험마다 빈 DB를 새로 만들어요. 시계를 앞으로 돌려 마감·몰수·리그 종료까지 확인해요.
 
 ## 만든 기술과 파일
 - 서버: Python 3.12, Flask, SQLite, Flask-Login, Flask-Bcrypt
@@ -73,8 +81,13 @@ flask --app app run --port 5000
 
 | 파일 | 하는 일 |
 |---|---|
-| `app.py` | 서버, DB, API, 대진·마감·순위 계산 |
+| `app.py` | 서버 진입점: 앱 설정, 로그인·API 연결, 오류 안내 |
+| `classleague/db.py` · `clock.py` · `inputs.py` | DB 연결과 표, 시각(KST/UTC), 요청 입력 읽기 |
+| `classleague/schedule.py` · `standings.py` | 대진표·일정 계산, 순위 계산 (DB 없이 계산만) |
+| `classleague/engine.py` · `league_state.py` | 마감 자동 처리(몰수)·채점·결과 재계산, 리그 상태 조회 |
+| `classleague/routes/` | API: 로그인(`auth`), 리그(`leagues`), 경기(`matches`), 관리자(`admin`), 신고(`reports`), 오답 노트(`notes`) |
 | `templates/index.html` | 화면 |
 | `static/index.js` · `static/index.css` | 화면 동작과 모양 |
 | `static/sw.js` · `static/manifest.webmanifest` | 홈 화면 설치, 오프라인 안내 |
 | `docs/SPEC.md` | 기능 정의서, 화면, 규칙과 예외 상황, 완료 기준 |
+| `tests/` | 자동 테스트: 대진·일정 계산, 경기 흐름, 권한·이상한 입력, 신고·리그 생명주기 |

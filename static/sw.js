@@ -1,7 +1,7 @@
 // Class League 서비스 워커 (PWA 설치·오프라인 안내용)
 // - 화면 파일(HTML·CSS·JS·아이콘)만 저장한다.
 // - 로그인·경기·문제 같은 API 응답은 절대 저장하지 않는다 (같은 기기의 다른 사람에게 남지 않게).
-const CACHE = "class-league-v1";
+const CACHE = "class-league-v2";
 const SHELL = [
   "/",
   "/static/index.css",
@@ -12,6 +12,7 @@ const SHELL = [
   "/static/icon-maskable-512.png",
   "/static/apple-touch-icon.png",
   "/static/offline.html",
+  "/static/offline.js",
 ];
 
 self.addEventListener("install", (event) => {
