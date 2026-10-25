@@ -166,6 +166,7 @@ function showAuth(tab) {
 // 처음 화면 버튼과 위쪽 바 버튼
 document.getElementById("landingLoginBtn").addEventListener("click", () => showAuth("login"));
 document.getElementById("landingRegisterBtn").addEventListener("click", () => showAuth("register"));
+document.getElementById("previewRegisterBtn").addEventListener("click", () => showAuth("register"));
 navLoginBtn.addEventListener("click", () => showAuth("login"));
 navRegisterBtn.addEventListener("click", () => showAuth("register"));
 // 로그인 화면에서 처음으로 돌아가기
