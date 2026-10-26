@@ -19,8 +19,8 @@ from classleague.schedule import make_round_robin
 
 BOT_NAMES = ["민수", "지아", "하준", "서연", "도윤"]
 DEMO_SUBJECTS = [{"name": "수학", "count": 2, "scope": "이차방정식"}, {"name": "영어", "count": 1, "scope": "Lesson 3"}]
-DEMO_REWARDS = [{"from": 1, "to": 1, "kind": "reward", "text": "🏅 우승 메달"},
-                {"from": 2, "to": 3, "kind": "reward", "text": "🍦 아이스크림"}]
+DEMO_REWARDS = [{"from": 1, "to": 1, "kind": "reward", "text": "우승 메달"},
+                {"from": 2, "to": 3, "kind": "reward", "text": "아이스크림"}]
 ROUND_DAYS = 2  # 체험 리그 한 라운드: 만들기 1일 + 풀기 1일 (앞당기기 전 기준)
 
 # 가상 친구가 내는 문제: (유형, 내용, 보기, 정답, 해설). 객관식 정답은 보기 번호(0부터)

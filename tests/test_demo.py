@@ -65,7 +65,7 @@ def test_advance_to_the_end_shows_final_result(app):
     assert c.post("/demo/advance").get_json()["passed"] is None, "더 넘길 단계가 없다"
     data = mine(c)
     assert data["league"]["status"] == "finished"
-    assert data["final"]["finalized"] and data["final"]["awards"][0]["text"] == "🏅 우승 메달"
+    assert data["final"]["finalized"] and data["final"]["awards"][0]["text"] == "우승 메달"
     assert data["demo"]["next"] is None
 
 

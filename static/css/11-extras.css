@@ -21,7 +21,6 @@
   width: 14px;
   height: 14px;
   border-radius: 3px;
-  border: 2px solid var(--ink);
 }
 .final-award.prize-tier {
   border-left: 8px solid var(--prize);
