@@ -149,3 +149,25 @@
 .legend-swatch.prize-green {
   background: var(--prize);
 }
+
+/* ===== 실시간 갱신 안내 (화면 아래 가운데에 떠 있는 버튼) ===== */
+.live-notice {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  z-index: 80; /* 할 일 서랍(70) 위, 확인 창(100) 아래 */
+  padding: 12px 20px;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--yellow);
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: 4px 4px 0 var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.live-notice:hover {
+  background: #e0d955;
+}

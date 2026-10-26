@@ -1,6 +1,6 @@
 // 05-schedule.js · 경기 일정 계산, 남은 시간, 경기 요일·리그 기간 방식
 
-// ===== 경기 일정 계산 (서버 app.py의 build_schedule과 같은 규칙) =====
+// ===== 경기 일정 계산 (서버 classleague/schedule.py의 build_schedule과 같은 규칙) =====
 // 날짜는 "YYYY-MM-DD"(한국 날짜) 글자로 다룬다. 요일은 월=0 … 일=6
 const DAY_NAMES = ["월", "화", "수", "목", "금", "토", "일"];
 
