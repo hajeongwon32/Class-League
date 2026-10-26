@@ -146,12 +146,16 @@ def recompute_match(db, match_id):
 
 def refresh_league(db, league_id):
     """마감 처리를 하고, 진행 중인 리그가 끝났는지 보고 끝났으면 상태를 '끝'으로 바꾼다 (요청이 올 때마다 확인)."""
-    league = db.execute("SELECT status FROM league WHERE id = ?", (league_id,)).fetchone()
+    league = db.execute("SELECT status, demo_owner_id FROM league WHERE id = ?", (league_id,)).fetchone()
     if league is not None and league["status"] == "finished":
         settle_reports(db, league_id)
         return
     if league is None or league["status"] != "running":
         return
+    if league["demo_owner_id"]:
+        # 체험 리그: 가상 친구가 마감 처리 전에 먼저 풀어 제출한다 (demo가 engine을 쓰므로 여기서 가져온다)
+        from classleague.demo import bots_act
+        bots_act(db, league_id)
     settle_deadlines(db, league_id)
     rows = round_rows(db, league_id)
     if not rows:

@@ -174,6 +174,13 @@ def init_db():
         # 학생을 내보내서 1명만 남아 일찍 끝난 경우의 종료 시각 (신고 판정 기한 계산용)
         if "ended_at" not in lcols:
             db.execute("ALTER TABLE league ADD COLUMN ended_at TEXT")
+        # 혼자 체험해 보기: 체험 리그면 체험하는 사람의 번호 (진짜 리그는 NULL)
+        if "demo_owner_id" not in lcols:
+            db.execute("ALTER TABLE league ADD COLUMN demo_owner_id INTEGER")
+        # 체험용 계정: 'guest'(로그인 없이 체험 시작한 사람) / 'bot'(가상 친구·체험 선생님) / NULL(보통 계정)
+        ucols = [r[1] for r in db.execute("PRAGMA table_info(user)").fetchall()]
+        if "demo_kind" not in ucols:
+            db.execute("ALTER TABLE user ADD COLUMN demo_kind TEXT")
 
         # 로그인 실패 기록: 아이디별로 연달아 틀린 횟수와 막힌 시각
         db.execute(

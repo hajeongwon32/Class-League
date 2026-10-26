@@ -27,6 +27,7 @@ async function loadMyLeague() {
 
   if (!data.in_league) {
     stopLive();
+    renderDemoBar(null);
     // 리그 없음 → 학생/관리자 고르기 화면
     noLeagueView.classList.remove("hidden");
     leagueView.classList.add("hidden");
@@ -37,6 +38,7 @@ async function loadMyLeague() {
 
   lastLeagueData = data;
   startLive(); // 리그에 있는 동안 변화를 바로 받는다
+  renderDemoBar(data);
   // 리그 있음 → 리그 정보 화면
   noLeagueView.classList.add("hidden");
   leagueView.classList.remove("hidden");
@@ -323,3 +325,81 @@ function onLiveChange() {
 function hideLiveNotice() {
   liveNotice.classList.add("hidden");
 }
+
+// ===== 혼자 체험해 보기: 가상 친구 3명과 체험 리그 한 판 =====
+// 로그인하지 않아도 체험 계정으로 바로 시작한다. [⏩ 다음 단계로]는 체험 리그의 마감만 바로 지나게 한다
+// (진짜 리그에는 이 버튼이 없고, 서버도 체험 리그가 아니면 거절한다).
+const demoBar = document.getElementById("demoBar");
+const demoBarTitle = document.getElementById("demoBarTitle");
+const demoNext = document.getElementById("demoNext");
+const demoPassed = document.getElementById("demoPassed");
+const demoAdvanceBtn = document.getElementById("demoAdvanceBtn");
+const demoSwitchBtn = document.getElementById("demoSwitchBtn");
+const demoEndBtn = document.getElementById("demoEndBtn");
+const demoFillBtn = document.getElementById("demoFillBtn");
+
+document.querySelectorAll("[data-demo-start]").forEach((btn) => btn.addEventListener("click", () => startDemo(btn)));
+
+async function startDemo(btn) {
+  const { ok, data } = await postJSON("/demo/start", {}, btn);
+  if (!ok) {
+    await askConfirm({ icon: "🎮", title: "체험을 시작하지 못했어요", text: data.error || "", ok: "확인", cancel: "닫기" });
+    return;
+  }
+  const me = await fetch("/me").then((r) => r.json()).catch(() => ({}));
+  showLoggedIn(me.nickname || data.nickname || "나");
+}
+
+function renderDemoBar(data) {
+  const demo = data && data.demo;
+  demoBar.classList.toggle("hidden", !demo);
+  demoFillBtn.classList.toggle("hidden", !demo || demo.as_teacher);
+  if (!demo) {
+    demoPassed.classList.add("hidden");
+    return;
+  }
+  demoBarTitle.textContent = demo.as_teacher
+    ? "👩‍🏫 체험 선생님 화면이에요. 진행 상황·신고 판정·정답률을 볼 수 있어요"
+    : "🎮 체험 리그예요. 가상 친구 3명과 한 판 해 보세요";
+  demoNext.textContent = demo.next
+    ? `⏩ 누르면 바로 지나가요: ${demo.next}`
+    : "🎉 모든 단계가 끝났어요. 위에서 최종 순위와 상품을 확인해 보세요";
+  demoAdvanceBtn.disabled = !demo.next;
+  demoSwitchBtn.textContent = demo.as_teacher ? "🎒 학생 화면으로 돌아가기" : "👩‍🏫 선생님 화면으로 보기";
+}
+
+demoAdvanceBtn.addEventListener("click", async () => {
+  const { ok, data } = await postJSON("/demo/advance", {}, demoAdvanceBtn);
+  if (!ok) {
+    await askConfirm({ icon: "⚠️", title: "다음 단계로 넘기지 못했어요", text: data.error || "", ok: "확인", cancel: "닫기" });
+    return;
+  }
+  await loadMyLeague();
+  if (data.passed) {
+    demoPassed.textContent = `✅ 지났어요: ${data.passed}`;
+    demoPassed.classList.remove("hidden");
+  }
+});
+
+demoSwitchBtn.addEventListener("click", async () => {
+  const { ok, data } = await postJSON("/demo/switch", {}, demoSwitchBtn);
+  if (ok) showLoggedIn(data.nickname);
+});
+
+demoEndBtn.addEventListener("click", async () => {
+  const yes = await askConfirm({ icon: "🎮", title: "체험을 끝낼까요?",
+    text: "체험 리그와 기록이 지워져요. 끝낸 뒤에는 진짜 리그에 들어가거나 만들 수 있어요.", ok: "체험 끝내기" });
+  if (!yes) return;
+  const { ok, data } = await postJSON("/demo/end", {}, demoEndBtn);
+  if (ok) showLoggedIn(data.nickname);
+});
+
+// 문제 만들기 화면: 예시 문제를 임시 저장한 뒤 다시 열어 칸을 채운다 ([완성]은 직접 누른다)
+demoFillBtn.addEventListener("click", async () => {
+  const { ok, data } = await postJSON("/demo/fill", {}, demoFillBtn);
+  if (!ok) {
+    await askConfirm({ icon: "⚠️", title: "예시 문제를 채우지 못했어요", text: data.error || "", ok: "확인", cancel: "닫기" });
+    return;
+  }
+  await openQuestions();
+});

@@ -9,6 +9,17 @@
     <div id="weekInfo" class="week-info hidden"></div>
     <button type="button" id="editSettingsBtn" class="btn btn-small hidden">⚙️ 리그 설정 고치기</button>
     <button type="button" id="pastFromLeagueBtn" class="btn btn-small hidden">📚 지난 리그</button>
+    <!-- 혼자 체험해 보기: 체험 리그에서만 보인다 -->
+    <div id="demoBar" class="demo-bar hidden" aria-live="polite">
+      <p id="demoBarTitle" class="demo-bar-title"></p>
+      <p id="demoNext" class="demo-bar-next"></p>
+      <p id="demoPassed" class="demo-bar-passed hidden"></p>
+      <div class="demo-bar-btns">
+        <button type="button" id="demoAdvanceBtn" class="btn">⏩ 다음 단계로</button>
+        <button type="button" id="demoSwitchBtn" class="btn btn-outline"></button>
+        <button type="button" id="demoEndBtn" class="btn btn-small">체험 끝내기</button>
+      </div>
+    </div>
   </div>
 
   <!-- 끝난 리그 최종 결과 -->
