@@ -50,6 +50,16 @@ def nickname_taken_in_league(db, league_id, nickname, except_user_id):
     )
 
 
+def active_league_id(db, user_id):
+    """지금 보고 있는 리그: 학생으로 참가한 리그, 없으면 내가 관리자인 리그 (둘 다 없으면 None)."""
+    mem = get_my_membership(db, user_id)
+    if mem:
+        return mem["league_id"]
+    # 관리자는 입장하지 않아도 리그를 가진다
+    row = get_admin_league(db, user_id)
+    return row["id"] if row else None
+
+
 def get_my_membership(db, user_id):
     """내가 들어간 리그 참가 정보를 돌려준다 (없으면 None)."""
     return db.execute(

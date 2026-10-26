@@ -10,6 +10,8 @@ const STATUS_TEXT = {
 async function loadMyLeague() {
   const res = await fetch("/leagues/mine");
   const data = await res.json().catch(() => ({}));
+  liveDirty = false; // 새로 그리므로 입력하던 내용도 새로 그려진다
+  hideLiveNotice();
 
   // 할 일 탭은 먼저 숨기고, 관리자 + 모집 중일 때만 아래에서 다시 보여 준다
   // (로그아웃 뒤 다른 계정으로 들어와도 남아 있지 않게)
@@ -24,6 +26,7 @@ async function loadMyLeague() {
   else renderWrongNoteCount(0, 0);
 
   if (!data.in_league) {
+    stopLive();
     // 리그 없음 → 학생/관리자 고르기 화면
     noLeagueView.classList.remove("hidden");
     leagueView.classList.add("hidden");
@@ -33,6 +36,7 @@ async function loadMyLeague() {
   }
 
   lastLeagueData = data;
+  startLive(); // 리그에 있는 동안 변화를 바로 받는다
   // 리그 있음 → 리그 정보 화면
   noLeagueView.classList.add("hidden");
   leagueView.classList.remove("hidden");
@@ -274,3 +278,48 @@ adminTabs.addEventListener("keydown", (e) => {
   selectAdminTab(next.dataset.tab, true);
 });
 
+
+// ===== 실시간 갱신 (SSE): 리그에 변화가 생기면 리그 홈을 새로 그린다 =====
+// 상대가 [완성]·제출하거나, 마감이 지나 몰수·다음 라운드가 되거나, 신고가 들어오면 새로고침 없이 바뀐다.
+// 서버는 '바뀌었다'는 알림만 보내고, 내용은 기존 API(/leagues/mine 등)로 다시 받는다.
+// 입력하던 내용이나 펼쳐 둔 내용이 있으면 덮어쓰지 않고 [새 소식이 있어요]만 띄운다.
+const liveNotice = document.getElementById("liveNotice");
+let liveSource = null;
+let liveDirty = false; // 리그 홈에서 입력하고 아직 새로 그리지 않은 내용이 있는지
+
+homeView.addEventListener("input", () => { liveDirty = true; });
+liveNotice.addEventListener("click", () => loadMyLeague());
+
+function startLive() {
+  if (liveSource || !window.EventSource) return;
+  liveSource = new EventSource("/leagues/events");
+  liveSource.addEventListener("change", onLiveChange);
+}
+
+function stopLive() {
+  if (liveSource) liveSource.close();
+  liveSource = null;
+  hideLiveNotice();
+}
+
+// 지금 리그 홈을 다시 그려도 사용자가 하던 일을 잃지 않는지
+function canRedrawLeague() {
+  if (homeView.classList.contains("hidden")) return false; // 문제 만들기·풀기 등 다른 화면
+  if (leagueView.classList.contains("hidden")) return false; // 리그 설정 고치기 화면 등
+  if (document.querySelector(".modal-backdrop:not(.hidden)")) return false; // 확인·신고 창
+  const active = document.activeElement;
+  if (active && homeView.contains(active) && ["INPUT", "TEXTAREA", "SELECT"].includes(active.tagName)) return false;
+  if (liveDirty) return false;
+  // 펼쳐 본 신고·표 (다른 화면에 열린 채 숨어 있는 것은 빼고, 지금 보이는 것만)
+  if ([...homeView.querySelectorAll("details[open]")].some((el) => el.offsetParent !== null)) return false;
+  return true;
+}
+
+function onLiveChange() {
+  if (canRedrawLeague()) loadMyLeague();
+  else liveNotice.classList.remove("hidden");
+}
+
+function hideLiveNotice() {
+  liveNotice.classList.add("hidden");
+}

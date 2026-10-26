@@ -64,6 +64,7 @@
 - **스케줄러 없는 마감 자동 처리:** 요청이 올 때 밀린 마감을 한꺼번에 정산하고, DB 쓰기 잠금으로 여러 사람이 동시에 열어도 한 번만 처리해요.
 - **정답 비공개:** 경기 단계와 사람에 따라 서버가 응답 자체를 다르게 만들어서, 개발자 도구로 봐도 제출 전에는 정답이 없어요.
 - **대진·일정 계산:** 라운드 로빈 대진, 종료 희망일까지 끝낼 수 있는 단기 리그 라운드 수, 경기당 평균 순위를 직접 계산해요.
+- **실시간 갱신:** 상대가 [완성]·제출하거나 마감이 지나면 열어 둔 리그 홈이 새로고침 없이 바뀌어요 (Server-Sent Events). 입력 중일 때는 덮어쓰지 않아요.
 - **무효 재계산:** 신고된 문제를 무효로 하면 점수·승패·순위·정답률·오답 노트가 모두 다시 계산돼요.
 - **시간 여행 테스트:** '지금 시각'을 한 곳에서만 정해서, 테스트가 시계를 돌려 마감·몰수·리그 종료를 기다리지 않고 확인해요.
 
@@ -93,7 +94,7 @@ pytest
 | `classleague/db.py` · `clock.py` · `inputs.py` | DB 연결과 표, 시각(KST/UTC), 요청 입력 읽기 |
 | `classleague/schedule.py` · `standings.py` | 대진표·일정 계산, 순위 계산 (DB 없이 계산만) |
 | `classleague/engine.py` · `league_state.py` | 마감 자동 처리(몰수)·채점·결과 재계산, 리그 상태 조회 |
-| `classleague/routes/` | API: 로그인(`auth`), 리그(`leagues`), 경기(`matches`), 관리자(`admin`), 신고(`reports`), 오답 노트(`notes`) |
+| `classleague/routes/` | API: 로그인(`auth`), 리그(`leagues`), 경기(`matches`), 관리자(`admin`), 신고(`reports`), 오답 노트(`notes`), 실시간 갱신(`live`) |
 | `templates/index.html` | 화면 뼈대. 화면마다 `templates/partials/`(처음 화면, 로그인, 리그 홈, 문제 만들기, 오답 노트 …)를 붙인다 |
 | `static/css/01-base.css` ~ `11-extras.css` | 화면 모양. 번호 순서대로 불러온다 (기본 → 리그 → 문제 → … → 화면 배치) |
 | `static/js/01-core.js` ~ `11-notes.js` | 화면 동작. 번호 순서대로 불러온다 (공통 도구 → 로그인 → 리그 홈 → … → 오답 노트) |

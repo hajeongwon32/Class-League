@@ -12,7 +12,7 @@ from classleague.clock import kst_deadline_utc, kst_midnight_utc, parse_utc
 from classleague.db import get_db, lock_db
 from classleague.engine import current_round, refresh_league, round_rows
 from classleague.inputs import read_json, text_of
-from classleague.league_state import admin_running_league, final_summary, finish_if_too_few, gen_league_code, get_admin_league, get_my_membership, league_need, league_status, nickname_taken_in_league, pending_report_count, round_scopes
+from classleague.league_state import active_league_id, admin_running_league, final_summary, finish_if_too_few, gen_league_code, get_admin_league, get_my_membership, league_need, league_status, nickname_taken_in_league, pending_report_count, round_scopes
 from classleague.schedule import build_schedule, clean_scope, DEADLINE_TIMES, END_DATE_MAX_DAYS, first_date_choices, make_round_robin, round_count, rounds_until, validate_make_days, validate_match_days
 from classleague.standings import compute_standings, total_weeks
 
@@ -490,15 +490,7 @@ def past_league_detail(league_id):
 def my_league():
     db = get_db()
     mem = get_my_membership(db, current_user.id)
-    admin_league = None
-
-    # 내가 관리자인 리그가 있는지도 본다 (관리자는 입장하지 않아도 리그를 가짐)
-    if mem is None:
-        admin_row = get_admin_league(db, current_user.id)
-        if admin_row:
-            admin_league = admin_row["id"]
-
-    league_id = mem["league_id"] if mem else admin_league
+    league_id = active_league_id(db, current_user.id)
     if league_id is None:
         return {"in_league": False}
 

@@ -152,6 +152,7 @@ function showLoggedOut() {
   guestArea.classList.remove("hidden");
   userArea.classList.add("hidden");
   renderAdminTodo(null); // 할 일 탭은 화면 밖(body)에 있어서 따로 숨긴다
+  stopLive(); // 실시간 갱신 연결도 끊는다
 }
 
 // 로그인/회원가입 화면 보여 주기 (학생·관리자는 여기서 고르지 않는다)
