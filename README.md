@@ -109,12 +109,22 @@
 - **시간 여행 테스트:** '지금 시각'을 한 곳에서만 정해서, 테스트가 시계를 돌려 마감·몰수·리그 종료를 기다리지 않고 확인해요.
 
 ## 직접 실행하기
+Mac · Linux (터미널)
 ```bash
 pip install -r requirements.txt
 echo "SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_hex(32))')" > .env
 flask --app app run --port 5000
 ```
+Windows (PowerShell)
+```powershell
+pip install -r requirements.txt
+python -c "import secrets; print('SECRET_KEY=' + secrets.token_hex(32))" | Out-File -Encoding ascii .env
+flask --app app run --port 5000
+```
 브라우저에서 http://localhost:5000 을 열어요. 데이터베이스(`app.db`)는 처음 실행할 때 `app.py` 옆에 자동으로 만들어져요.
+
+- `.env`(로그인 상태를 지키는 비밀키)는 없어도 실행돼요. 그때는 임시 비밀키를 쓰고, 서버를 다시 켜면 로그인이 풀려요.
+- Windows에서 `> .env`로 만들면 파일이 UTF-16으로 저장돼 `flask`가 `UnicodeDecodeError`를 내며 켜지지 않아요. 위 명령처럼 `Out-File -Encoding ascii`로 만들거나, `.env`를 지우고 다시 실행해요.
 
 ### 테스트
 ```bash
