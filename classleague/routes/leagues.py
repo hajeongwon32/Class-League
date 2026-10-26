@@ -7,7 +7,7 @@ from datetime import date, timedelta
 from flask import Blueprint
 from flask_login import current_user, login_required
 
-from classleague import clock
+from classleague import clock, demo
 from classleague.clock import kst_deadline_utc, kst_midnight_utc, parse_utc
 from classleague.db import get_db, lock_db
 from classleague.engine import current_round, refresh_league, round_rows
@@ -271,7 +271,7 @@ def join_league():
         return {"error": "리그를 만든 관리자는 학생으로 들어갈 수 없어요"}, 409
 
     league = db.execute(
-        "SELECT id, status FROM league WHERE code = ? AND deleted = 0", (code,)
+        "SELECT id, status FROM league WHERE code = ? AND deleted = 0 AND demo_owner_id IS NULL", (code,)
     ).fetchone()
     if league is None:
         return {"error": "그런 코드의 리그가 없어요"}, 404
@@ -432,7 +432,7 @@ def past_leagues():
     out = []
     for r in db.execute(
         "SELECT l.id, l.name, l.league_mode, l.first_date, m.left_at FROM membership m "
-        "JOIN league l ON l.id = m.league_id WHERE m.user_id = ? AND m.status = 'archived' "
+        "JOIN league l ON l.id = m.league_id WHERE m.user_id = ? AND m.status = 'archived' AND l.demo_owner_id IS NULL "
         "ORDER BY m.left_at DESC",
         (uid,),
     ).fetchall():
@@ -443,7 +443,7 @@ def past_leagues():
                     "players": len(table), "my_rank": me["rank"] if me else None,
                     "winner": table[0]["nickname"] if table else None})
     for r in db.execute(
-        "SELECT id, name, league_mode, first_date FROM league WHERE admin_id = ? AND admin_closed = 1 "
+        "SELECT id, name, league_mode, first_date FROM league WHERE admin_id = ? AND admin_closed = 1 AND demo_owner_id IS NULL "
         "AND deleted = 0 ORDER BY id DESC",
         (uid,),
     ).fetchall():
@@ -497,7 +497,7 @@ def my_league():
     refresh_league(db, league_id)
     league = db.execute(
         "SELECT id, name, code, admin_id, status, subjects, rewards, match_days, first_date, "
-        "deadline_time, make_days, league_mode, end_date FROM league WHERE id = ?",
+        "deadline_time, make_days, league_mode, end_date, demo_owner_id FROM league WHERE id = ?",
         (league_id,),
     ).fetchone()
 
@@ -531,6 +531,8 @@ def my_league():
         },
         "members": [{"id": m["id"], "nickname": m["nickname"]} for m in members],
     }
+    if league["demo_owner_id"]:
+        result["demo"] = demo.info(db, league_id, current_user.id)  # 혼자 체험해 보기
 
     # 모집 중이면 관리자에게 첫 경기로 고를 수 있는 날짜를 준다 (서버가 정한 '오늘' 기준)
     if league["status"] == "recruiting" and result["is_admin"]:
