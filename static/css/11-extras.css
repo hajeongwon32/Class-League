@@ -171,3 +171,70 @@
 .live-notice:hover {
   background: #e0d955;
 }
+
+/* ===== 혼자 체험해 보기 ===== */
+/* 시작 버튼: 로그인·회원가입과 구별되게 짙은 색 */
+.demo-start-btn {
+  background: var(--ink);
+  color: #fff;
+}
+.demo-start-btn:hover {
+  background: #2e3d27;
+}
+.demo-start {
+  margin-top: 16px;
+}
+.demo-start-hint {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #5f6652;
+  line-height: 1.5;
+}
+.demo-choose {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.demo-choose p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+/* 체험 리그 안내 (리그 이름 카드 안) */
+.demo-bar {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 3px dashed var(--ink);
+  border-radius: 10px;
+  background: var(--yellow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.demo-bar p {
+  margin: 0;
+  line-height: 1.5;
+}
+.demo-bar-title {
+  font-weight: 800;
+}
+.demo-bar-next {
+  font-size: 14px;
+  color: #3f4636;
+}
+.demo-bar-passed {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--grass-dark);
+}
+.demo-bar-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+.demo-bar-btns .btn {
+  width: auto;
+  margin-top: 0;
+}
