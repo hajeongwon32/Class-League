@@ -10,6 +10,10 @@ app.db
 app.log
 *.log
 
+# 테스트 커버리지 측정 기록
+.coverage
+htmlcov/
+
 # 파이썬 캐시
 __pycache__/
 *.pyc

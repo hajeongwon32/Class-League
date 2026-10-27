@@ -130,8 +130,10 @@ flask --app app run --port 5000
 ```bash
 pip install -r requirements-dev.txt
 pytest
+pytest --cov=classleague --cov=app   # 커버리지(테스트가 실행한 코드 비율)까지 보기
 ```
 진짜 `app.db`는 건드리지 않고 시험마다 빈 DB를 새로 만들어요. 시계를 앞으로 돌려 마감·몰수·리그 종료까지 확인해요.
+자동 테스트 69개가 서버 코드의 **83%**를 실행해 확인해요.
 
 ## 만든 기술과 파일
 - 서버: Python 3.12, Flask, SQLite, Flask-Login, Flask-Bcrypt
