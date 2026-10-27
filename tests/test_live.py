@@ -81,9 +81,10 @@ def test_deadline_passing_is_settled_by_the_stream(league, clock):
 
     # 아무도 리그 화면을 다시 열지 않았는데, 스트림이 정산해서 이미 몰수 결과가 DB에 있다
     import sqlite3
+    from contextlib import closing
     from classleague import db as db_module
-    row = sqlite3.connect(db_module.DB_PATH).execute(
-        "SELECT result, forfeit, forfeit_stage FROM match WHERE id = ?", (mid,)).fetchone()
+    with closing(sqlite3.connect(db_module.DB_PATH)) as conn:
+        row = conn.execute("SELECT result, forfeit, forfeit_stage FROM match WHERE id = ?", (mid,)).fetchone()
     assert row == ("p1", 1, "make")
 
 

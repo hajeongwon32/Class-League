@@ -14,6 +14,11 @@ bp = Blueprint("admin", __name__)
 
 
 # ---------- 관리자 화면 (F16·F16-1·F16-2) ----------
+def player_progress(m, p):
+    """경기 m에서 p1 또는 p2가 [완성]했는지, 제출했는지."""
+    return {"made": m[f"{p}_state"] == "done", "submitted": bool(m[f"{p}_done"])}
+
+
 @bp.get("/admin/progress")
 @login_required
 def admin_progress():
@@ -39,10 +44,7 @@ def admin_progress():
         if m["player2_id"] is None:
             byes.append(m["n1"])
             continue
-        def side(p):
-            done, sub = m[f"{p}_state"] == "done", bool(m[f"{p}_done"])
-            return {"made": done, "submitted": sub}
-        a, b = side("p1"), side("p2")
+        a, b = player_progress(m, "p1"), player_progress(m, "p2")
         if m["result"] is None:
             todo["make"] += (not a["made"]) + (not b["made"])
             todo["solve"] += (not a["submitted"]) + (not b["submitted"])

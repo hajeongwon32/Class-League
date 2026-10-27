@@ -111,7 +111,8 @@ def test_too_long_and_html_text(league, clock):
 def test_security_headers_on_pages_and_api(app):
     c = app.test_client()
     for url in ("/", "/me", "/static/js/01-core.js"):
-        h = c.get(url).headers
+        with c.get(url) as r:  # 파일 응답은 닫아야 파일도 닫힌다
+            h = r.headers
         csp = h["Content-Security-Policy"]
         assert "script-src 'self'" in csp and "frame-ancestors 'none'" in csp
         assert "unsafe-inline" not in csp and "unsafe-eval" not in csp
@@ -131,7 +132,8 @@ def test_html_has_no_inline_script_or_style():
     paths.append(os.path.join(root, "static", "offline.html"))
     assert len(paths) > 2, "화면 조각(templates/partials)도 검사해야 한다"
     for path in paths:
-        html = open(path, encoding="utf-8").read()
+        with open(path, encoding="utf-8") as f:
+            html = f.read()
         assert not re.search(r"\sstyle=\"", html), path
         assert not re.search(r"\son[a-z]+=\"", html), path
         assert not re.search(r"<script(?![^>]*\bsrc=)", html), path
@@ -145,12 +147,15 @@ def test_page_loads_every_file_it_needs(app):
     page = c.get("/").get_data(as_text=True)
     refs = re.findall(r'(?:href|src)="(/static/[^"]+)"', page)
     assert any("/static/css/" in r for r in refs) and any("/static/js/" in r for r in refs)
-    sw = c.get("/sw.js").get_data(as_text=True)
+    with c.get("/sw.js") as r:
+        sw = r.get_data(as_text=True)
     shell = re.findall(r'"(/static/[^"]+)"', sw)
-    offline = c.get("/static/offline.html").get_data(as_text=True)
+    with c.get("/static/offline.html") as r:
+        offline = r.get_data(as_text=True)
     refs += shell + re.findall(r'(?:href|src)="(/static/[^"]+)"', offline)
     for url in sorted(set(refs)):
-        assert c.get(url).status_code == 200, url
+        with c.get(url) as r:
+            assert r.status_code == 200, url
     # 서비스 워커는 첫 화면이 부르는 CSS·JS를 모두 저장해 둬야 오프라인 안내가 제대로 보인다
     for url in refs:
         if url.endswith((".css", ".js")) and "offline" not in url:

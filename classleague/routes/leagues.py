@@ -677,7 +677,7 @@ def start_league():
         rounds = rounds[:n]
     schedule = build_schedule(first, days, len(rounds), league["make_days"])
     dt = league["deadline_time"]
-    for pairs, sch in zip(rounds, schedule):
+    for pairs, sch in zip(rounds, schedule, strict=True):
         times = (kst_midnight_utc(sch["start"]), kst_deadline_utc(sch["make_last"], dt),
                  kst_deadline_utc(sch["last"], dt))
         for p1, p2 in pairs:
