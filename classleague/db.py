@@ -2,6 +2,7 @@
 
 import os
 import sqlite3
+from contextlib import closing
 
 from flask import g
 
@@ -26,7 +27,8 @@ def close_db(exception):
 
 
 def init_db():
-    with sqlite3.connect(DB_PATH) as db:
+    # sqlite3의 with는 commit(실패하면 rollback)만 하고 연결은 닫지 않아서 closing으로 함께 닫는다
+    with closing(sqlite3.connect(DB_PATH)) as conn, conn as db:
         db.execute(
             """
             CREATE TABLE IF NOT EXISTS user (
