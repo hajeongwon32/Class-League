@@ -467,7 +467,7 @@ def past_leagues():
 @bp.get("/leagues/past/<int:league_id>")
 @login_required
 def past_league_detail(league_id):
-    """지난 리그의 최종 순위·상품·벌칙 (내가 보관한 리그 또는 내가 닫은 리그만)."""
+    """지난 리그의 최종 순위·상품 (내가 보관한 리그 또는 내가 닫은 리그만)."""
     db = get_db()
     uid = current_user.id
     is_student = db.execute(

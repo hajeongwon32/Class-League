@@ -38,6 +38,7 @@ def start_demo():
     db = get_db()
     password_hash = unknown_password_hash()  # 해시는 오래 걸려서 잠그기 전에 만든다
     lock_db(db)
+    demo.cleanup_stale_demos(db)  # [체험 끝내기]를 안 누르고 떠난 지 하루가 지난 체험 기록 정리
     if current_user.is_authenticated:
         if my_demo_league(db):
             db.commit()

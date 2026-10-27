@@ -137,7 +137,7 @@ function fillStandingsTable(head, body, ruleEl, data, onName = null) {
       }
       if (i === 1 && onName) {
         // 키보드(Tab·Enter)로도 열 수 있게 이름 칸에 버튼을 둔다. 누르면 아래 행 클릭으로 이어진다
-        const btn = el("button", "member-link", `${row.nickname} 📝`);
+        const btn = el("button", "member-link", row.nickname);
         btn.type = "button";
         btn.setAttribute("aria-label", `${row.nickname}이(가) 만든 문제 보기`);
         td.append(btn);

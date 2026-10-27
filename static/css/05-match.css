@@ -92,23 +92,9 @@
   line-height: 1.5;
 }
 
-/* ===== 순위표 상품 구간 색칠 ===== */
-.standings tr.zone-reward td {
-  background: #e3f3df;
-}
-
-.standings tr.zone-penalty td {
-  background: #fbe2dc;
-}
-
-/* 내 줄이면서 구간일 때, 내 줄 강조를 우선 */
+/* 내 줄 강조 */
 .standings tr.me td {
   background: var(--yellow-soft);
-}
-
-/* 상품 받는 등수: 맨 왼쪽 등수 칸을 조금 강조 */
-.standings td.rank-reward {
-  font-weight: 900;
 }
 
 /* 상품 범례 */
@@ -120,19 +106,15 @@
 }
 
 .legend-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   font-weight: 700;
   padding: 7px 11px;
   border: 2px solid var(--ink);
   border-radius: 8px;
-}
-
-.legend-chip.zone-reward {
-  background: #e3f3df;
-}
-
-.legend-chip.zone-penalty {
-  background: #fbe2dc;
+  background: var(--paper);
 }
 
 /* ===== 지난 경기 기록 ===== */
@@ -201,8 +183,7 @@
   margin-bottom: 8px;
 }
 
-.reward-row input,
-.reward-row select {
+.reward-row input {
   margin-top: 0;
 }
 
@@ -210,11 +191,6 @@
 .reward-row .reward-to {
   width: 52px;
   text-align: center;
-  padding: 10px 6px;
-}
-
-.reward-row .reward-kind {
-  width: 72px;
   padding: 10px 6px;
 }
 

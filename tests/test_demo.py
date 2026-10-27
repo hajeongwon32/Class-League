@@ -182,3 +182,37 @@ def test_logged_in_user_can_demo_with_own_nickname(new_user):
     names = [r["nickname"] for r in mine(c)["standings"]]
     assert "지아" in names and len(set(names)) == 4, "가상 친구 이름은 내 닉네임과 겹치지 않는다"
     assert mine(c)["demo"]["guest"] is False, "내 계정으로 체험하면 임시 계정이 아니다"
+
+
+def test_abandoned_demo_is_cleaned_up_after_a_day(app, league, new_user, clock):
+    """[체험 끝내기]를 안 누르고 떠난 체험은 하루가 지나 누군가 체험을 시작할 때 지워진다. 진짜 리그·회원은 그대로."""
+    admin, students, code = league(2)
+    member = new_user("stu0002", "회원")
+    member.post("/demo/start")             # 회원 계정으로 체험하고 떠남
+    left = demo_client(app)                # 임시 계정으로 체험하고 떠남
+    left_league = mine(left)["league"]["id"]
+
+    def counts():
+        with closing(sqlite3.connect(db_module.DB_PATH)) as db:
+            q = lambda sql: db.execute(sql).fetchone()[0]
+            return (q("SELECT COUNT(*) FROM league WHERE demo_owner_id IS NOT NULL"),
+                    q("SELECT COUNT(*) FROM user WHERE demo_kind IN ('guest', 'bot')"),
+                    q("SELECT COUNT(*) FROM league WHERE demo_owner_id IS NULL"),
+                    q("SELECT COUNT(*) FROM user WHERE demo_kind IS NULL"))
+
+    demos, demo_users, real_leagues, real_users = counts()
+    assert demos == 2
+
+    clock.set(2026, 10, 25, 20, 0)         # 하루가 안 지났으면 그대로
+    demo_client(app)
+    assert counts()[0] == 3
+
+    clock.set(2026, 10, 26, 4, 0)          # 처음 두 체험은 하루가 지났다
+    fresh = demo_client(app)
+    after = counts()
+    assert after[0] == 2, "하루 지난 체험 리그 2개만 지운다"
+    assert after[2:] == (real_leagues, real_users), "진짜 리그와 회원 계정은 그대로"
+    assert left.get("/me").get_json()["logged_in"] is False, "지워진 임시 계정은 로그아웃된다"
+    assert member.get("/leagues/mine").get_json()["in_league"] is False, "회원은 체험만 지워지고 계정은 남는다"
+    assert mine(fresh)["league"]["id"] != left_league
+    assert students[0].get("/leagues/mine").get_json()["in_league"] is True

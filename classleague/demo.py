@@ -22,6 +22,7 @@ DEMO_SUBJECTS = [{"name": "수학", "count": 2, "scope": "이차방정식"}, {"n
 DEMO_REWARDS = [{"from": 1, "to": 1, "kind": "reward", "text": "우승 메달"},
                 {"from": 2, "to": 3, "kind": "reward", "text": "아이스크림"}]
 ROUND_DAYS = 2  # 체험 리그 한 라운드: 만들기 1일 + 풀기 1일 (앞당기기 전 기준)
+DEMO_KEEP_HOURS = 24  # [체험 끝내기]를 안 누르고 떠난 체험 기록은 이 시간이 지나면 자동으로 지운다
 
 # 가상 친구가 내는 문제: (유형, 내용, 보기, 정답, 해설). 객관식 정답은 보기 번호(0부터)
 MATH_BANK = [
@@ -213,6 +214,29 @@ def delete_demo_league(db, league_id):
         db.execute(f"DELETE FROM {table} WHERE league_id = ?", (league_id,))
     db.execute("DELETE FROM league WHERE id = ?", (league_id,))
     db.executemany("DELETE FROM user WHERE id = ? AND demo_kind = 'bot'", [(b,) for b in bot_ids])
+
+
+def cleanup_stale_demos(db):
+    """
+    오래된 체험 기록을 지운다 (새 체험을 시작할 때 부른다. 잠금은 부르는 쪽에서 건다).
+    - 만든 지 DEMO_KEEP_HOURS가 지난 체험 리그: 경기·문제·가상 친구까지 delete_demo_league로 지운다
+    - 체험 리그가 없는 임시 계정('나')과 가상 친구: 다시 로그인할 수 없는 계정이라 같이 지운다
+    진짜 리그와 회원 계정은 건드리지 않는다 (demo_owner_id·demo_kind로만 고른다).
+    돌려주는 값: 지운 체험 리그 수
+    """
+    cutoff = (clock.now_utc() - timedelta(hours=DEMO_KEEP_HOURS)).isoformat()
+    old = [r[0] for r in db.execute(
+        "SELECT id FROM league WHERE demo_owner_id IS NOT NULL AND created_at < ?", (cutoff,)).fetchall()]
+    for league_id in old:
+        delete_demo_league(db, league_id)
+    # 남은 체험 리그와 아무 관계가 없는 체험용 계정 (중간에 지워진 리그의 흔적 포함)
+    db.execute(
+        "DELETE FROM user WHERE demo_kind IN ('guest', 'bot') "
+        "AND id NOT IN (SELECT demo_owner_id FROM league WHERE demo_owner_id IS NOT NULL) "
+        "AND id NOT IN (SELECT admin_id FROM league) "
+        "AND id NOT IN (SELECT user_id FROM membership)"
+    )
+    return len(old)
 
 
 def info(db, league_id, user_id):

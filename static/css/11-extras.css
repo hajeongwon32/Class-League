@@ -10,12 +10,6 @@
 .standings tr.row-link:focus-within td.rank-reward {
   box-shadow: inset 5px 0 0 var(--prize), inset 0 0 0 999px rgba(31, 42, 26, 0.04);
 }
-.legend-chip {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--paper);
-}
 .legend-swatch {
   flex: 0 0 auto;
   width: 14px;
