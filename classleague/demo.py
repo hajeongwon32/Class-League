@@ -197,8 +197,30 @@ def advance(db, league_id):
     return step["label"]
 
 
+def delete_demo_league(db, league_id):
+    """체험 리그를 기록째 지운다: 경기·문제·풀이·신고·범위·[이제 알아요]와 가상 친구·체험 선생님 계정.
+    체험하는 사람의 계정은 지우지 않는다 (임시 계정이면 routes/demo.py에서 따로 지운다)."""
+    row = db.execute("SELECT admin_id, demo_owner_id FROM league WHERE id = ?", (league_id,)).fetchone()
+    if row is None or not row["demo_owner_id"]:
+        return  # 진짜 리그는 절대 지우지 않는다
+    bot_ids = [r[0] for r in db.execute(
+        "SELECT u.id FROM user u WHERE u.demo_kind = 'bot' AND (u.id = ? OR u.id IN "
+        "(SELECT user_id FROM membership WHERE league_id = ?))", (row["admin_id"], league_id)).fetchall()]
+    db.execute("DELETE FROM wrong_note_known WHERE source = 'league' AND qkey IN "
+               "(SELECT CAST(id AS TEXT) FROM question WHERE league_id = ?)", (league_id,))
+    db.execute("DELETE FROM submission WHERE match_id IN (SELECT id FROM match WHERE league_id = ?)", (league_id,))
+    for table in ("report", "question", "match", "round_scope", "membership"):
+        db.execute(f"DELETE FROM {table} WHERE league_id = ?", (league_id,))
+    db.execute("DELETE FROM league WHERE id = ?", (league_id,))
+    db.executemany("DELETE FROM user WHERE id = ? AND demo_kind = 'bot'", [(b,) for b in bot_ids])
+
+
 def info(db, league_id, user_id):
-    """리그 홈에 보여 줄 체험 안내: 선생님 화면인지, [다음 단계로]를 누르면 지나갈 마감."""
-    row = db.execute("SELECT admin_id FROM league WHERE id = ?", (league_id,)).fetchone()
+    """리그 홈에 보여 줄 체험 안내: 선생님 화면인지, 임시 계정으로 체험 중인지, [다음 단계로]를 누르면 지나갈 마감."""
+    row = db.execute(
+        "SELECT l.admin_id, u.demo_kind FROM league l JOIN user u ON u.id = l.demo_owner_id WHERE l.id = ?",
+        (league_id,),
+    ).fetchone()
     step = next_step(db, league_id)
-    return {"as_teacher": row["admin_id"] == user_id, "next": step["label"] if step else None}
+    return {"as_teacher": row["admin_id"] == user_id, "guest": row["demo_kind"] == "guest",
+            "next": step["label"] if step else None}

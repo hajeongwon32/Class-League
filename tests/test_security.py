@@ -3,7 +3,7 @@ import pytest
 
 from classleague.db import get_db
 
-from conftest import PASSWORD, current, questions
+from conftest import PASSWORD, current, league_settings, questions
 
 
 def running_match(league, clock, n=2):
@@ -196,3 +196,13 @@ def test_https_behind_proxy_also_gets_secure_cookie(app, new_user):
 def test_too_big_request_is_refused_kindly(app):
     r = app.test_client().post("/register", data="x" * (3 * 1024 * 1024), content_type="application/json")
     assert r.status_code == 413 and "error" in r.get_json()
+
+
+def test_prize_rank_is_limited_to_thirty(new_user):
+    """아주 큰 등수(예: 1~10억등)를 보내도 서버가 그만큼 계산하지 않고 바로 거절한다."""
+    admin = new_user("teacher1", "선생님")
+    huge = league_settings(rewards=[{"from": 1, "to": 10**9, "text": "상품"}])
+    r = admin.post("/leagues", json=huge)
+    assert r.status_code == 400 and "30등" in r.get_json()["error"]
+    ok = league_settings(rewards=[{"from": 1, "to": 30, "text": "참가상"}])
+    assert admin.post("/leagues", json=ok).status_code == 201

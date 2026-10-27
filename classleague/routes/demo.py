@@ -5,7 +5,7 @@ import json
 import secrets
 
 from flask import Blueprint
-from flask_login import current_user, login_required, login_user
+from flask_login import current_user, login_required, login_user, logout_user
 
 from classleague import clock, demo
 from classleague.db import get_db, lock_db
@@ -129,16 +129,25 @@ def switch_demo_view():
 @bp.post("/demo/end")
 @login_required
 def end_demo():
-    """체험 리그를 지우고 체험하는 사람으로 돌아온다. 그 뒤에는 진짜 리그에 들어가거나 만들 수 있다."""
+    """
+    체험 리그를 기록째 지운다 (오답 노트에도 남지 않는다).
+    - 내 계정으로 체험했으면: 내 계정으로 돌아온다. 그 뒤에는 진짜 리그에 들어가거나 만들 수 있다.
+    - 로그인 없이 만든 임시 계정('나')이면: 그 계정도 지우고 로그아웃한다 (다시 로그인할 수 없는 계정이라서).
+    """
     db = get_db()
     lock_db(db)
     league = my_demo_league(db)
     if league is None:
         return {"error": "체험 리그에서만 쓸 수 있어요"}, 403
-    owner = db.execute("SELECT id, username, nickname FROM user WHERE id = ?", (league["demo_owner_id"],)).fetchone()
-    db.execute("DELETE FROM membership WHERE league_id = ?", (league["id"],))
-    db.execute("UPDATE league SET deleted = 1, admin_closed = 1 WHERE id = ?", (league["id"],))
+    owner = db.execute("SELECT id, username, nickname, demo_kind FROM user WHERE id = ?",
+                       (league["demo_owner_id"],)).fetchone()
+    demo.delete_demo_league(db, league["id"])
+    if owner["demo_kind"] == "guest":
+        db.execute("DELETE FROM user WHERE id = ? AND demo_kind = 'guest'", (owner["id"],))
+        db.commit()
+        logout_user()
+        return {"ok": True, "logged_out": True}
     db.commit()
     if current_user.id != owner["id"]:
         login_user(User(owner["id"], owner["username"], owner["nickname"]), remember=True)
-    return {"ok": True, "nickname": owner["nickname"]}
+    return {"ok": True, "logged_out": False, "nickname": owner["nickname"]}
