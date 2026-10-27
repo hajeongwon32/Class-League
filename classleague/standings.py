@@ -54,19 +54,23 @@ def compute_standings(db, league_id):
             stats[p2]["against"] += s1
         if mt["result"] == "p1":
             if p1 in stats:
-                stats[p1]["win"] += 1; stats[p1]["points"] += 3
+                stats[p1]["win"] += 1
+                stats[p1]["points"] += 3
             if p2 in stats:
                 stats[p2]["lose"] += 1
         elif mt["result"] == "p2":
             if p2 in stats:
-                stats[p2]["win"] += 1; stats[p2]["points"] += 3
+                stats[p2]["win"] += 1
+                stats[p2]["points"] += 3
             if p1 in stats:
                 stats[p1]["lose"] += 1
         elif mt["result"] == "draw":
             if p1 in stats:
-                stats[p1]["draw"] += 1; stats[p1]["points"] += 1
+                stats[p1]["draw"] += 1
+                stats[p1]["points"] += 1
             if p2 in stats:
-                stats[p2]["draw"] += 1; stats[p2]["points"] += 1
+                stats[p2]["draw"] += 1
+                stats[p2]["points"] += 1
         elif mt["result"] == "both_lose":
             for p in (p1, p2):
                 if p in stats:
@@ -96,12 +100,13 @@ def compute_standings(db, league_id):
         if row["attempted"]:
             row["accuracy"] = row["correct"] / row["attempted"]
 
-    if mode == "short":
-        key = lambda r: (-r["points_per_game"], -r["goal_diff_per_game"],
-                         -r["accuracy"], r["nickname"])
-    else:
-        key = lambda r: (-r["points"], -r["goal_diff"], -r["scored"], r["nickname"])
-    table = sorted(stats.values(), key=key)
+    def short_key(r):
+        return (-r["points_per_game"], -r["goal_diff_per_game"], -r["accuracy"], r["nickname"])
+
+    def full_key(r):
+        return (-r["points"], -r["goal_diff"], -r["scored"], r["nickname"])
+
+    table = sorted(stats.values(), key=short_key if mode == "short" else full_key)
     for i, row in enumerate(table, start=1):
         row["rank"] = i
     return table

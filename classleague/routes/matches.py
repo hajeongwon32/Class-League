@@ -510,7 +510,7 @@ def forfeit_reason_for(m, is_p1):
     """내 입장에서 이해하기 쉬운 몰수 이유."""
     if not m["forfeit"]:
         return None
-    me, op = ("p1", "p2") if is_p1 else ("p2", "p1")
+    me = "p1" if is_p1 else "p2"
     stage = "문제 만들기 마감까지 [완성]하지 않음" if m["forfeit_stage"] == "make" else "문제 풀기 마감까지 제출하지 않음"
     if m["result"] == "both_lose":
         return f"두 사람 모두 {stage} · 둘 다 패"

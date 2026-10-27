@@ -1,6 +1,7 @@
 """대진표와 경기 일정 계산 (SPEC 5. 리그 기간 방식·경기 일정). DB를 쓰지 않는 계산만 둔다."""
 
 from datetime import datetime, timedelta
+from itertools import pairwise
 
 from classleague import clock
 from classleague.clock import kst_deadline_utc
@@ -68,7 +69,7 @@ def validate_match_days(raw):
         return None, "경기 요일은 1주일에 3번까지 고를 수 있어요"
     # 경기 요일끼리 하루 이상 띄우기 (일요일 다음은 월요일이라 한 바퀴 돌려서도 본다)
     if len(days) > 1:
-        gaps = [b - a for a, b in zip(days, days[1:])] + [days[0] + 7 - days[-1]]
+        gaps = [b - a for a, b in pairwise(days)] + [days[0] + 7 - days[-1]]
         if min(gaps) < 2:
             return None, "경기 요일끼리는 하루 이상 띄워 주세요 (예: 월·화는 안 돼요)"
     return days, None
@@ -78,7 +79,7 @@ def shortest_round_days(days):
     """경기 요일로 생기는 라운드 중 가장 짧은 라운드의 날 수 (요일 하나면 7일)."""
     if len(days) == 1:
         return 7
-    return min([b - a for a, b in zip(days, days[1:])] + [days[0] + 7 - days[-1]])
+    return min([b - a for a, b in pairwise(days)] + [days[0] + 7 - days[-1]])
 
 
 def validate_make_days(raw, days):
