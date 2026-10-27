@@ -18,6 +18,8 @@ from classleague.standings import compute_standings, total_weeks
 
 bp = Blueprint("leagues", __name__)
 
+MAX_PLAYERS = 30  # 한 리그의 학생 수 (상품 등수도 여기까지)
+
 
 # ---------- 리그 설정 검사 (F4): 만들기·고치기에서 같이 쓴다 ----------
 def parse_league_settings(data):
@@ -96,6 +98,8 @@ def parse_league_settings(data):
             text = text_of(r, "text")[:100]
             if rfrom < 1 or rto < rfrom or not text:
                 continue
+            if rto > MAX_PLAYERS:
+                return None, f"상품 등수는 1~{MAX_PLAYERS}등 안에서 정해 주세요 (학생은 {MAX_PLAYERS}명까지예요)"
             ranks = set(range(rfrom, rto + 1))
             if ranks & taken_ranks:
                 return None, "상품을 주는 등수가 서로 겹쳐요. 한 등수에는 상품을 하나만 정할 수 있어요"
@@ -277,6 +281,11 @@ def join_league():
         return {"error": "그런 코드의 리그가 없어요"}, 404
     if league["status"] != "recruiting":
         return {"error": "이미 시작했거나 끝난 리그예요"}, 409
+    joined = db.execute(
+        "SELECT COUNT(*) FROM membership WHERE league_id = ? AND status = 'active'", (league["id"],)
+    ).fetchone()[0]
+    if joined >= MAX_PLAYERS:
+        return {"error": f"이 리그는 자리가 다 찼어요 ({MAX_PLAYERS}명)"}, 409
 
     # 같은 리그 안에서는 닉네임이 겹치면 안 된다 (순위표·대진표에서 누군지 헷갈리므로)
     if nickname_taken_in_league(db, league["id"], current_user.nickname, current_user.id):
@@ -663,8 +672,8 @@ def start_league():
     player_ids = [m["user_id"] for m in members]
     if len(player_ids) < 2:
         return {"error": "학생이 2명 이상 있어야 시작할 수 있어요"}, 400
-    if len(player_ids) > 30:
-        return {"error": "학생은 30명까지 참가할 수 있어요"}, 400
+    if len(player_ids) > MAX_PLAYERS:
+        return {"error": f"학생은 {MAX_PLAYERS}명까지 참가할 수 있어요"}, 400
 
     # 대진표 자동 생성 (라운드 로빈) + 라운드별 날짜
     rounds = make_round_robin(player_ids)

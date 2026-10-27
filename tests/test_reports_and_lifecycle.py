@@ -113,3 +113,10 @@ def test_short_league_never_repeats_opponent(league, clock):
         opps = [h["opponent"] for h in hist if not h.get("bye")]
         assert len(opps) == len(set(opps)) == info["rounds"], "6명(짝수)이면 모두 같은 수의 경기를 한다"
     assert students[0].get("/leagues/mine").get_json()["league"]["league_mode"] == "short"
+
+
+def test_league_is_full_at_thirty_students(league, new_user):
+    admin, students, code = league(30)
+    late = new_user("stu9999", "늦은학생")
+    r = late.post("/leagues/join", json={"code": code})
+    assert r.status_code == 409 and "30명" in r.get_json()["error"], "31명째는 참가할 때 바로 막는다"

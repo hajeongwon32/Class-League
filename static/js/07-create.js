@@ -51,6 +51,7 @@ createForm.addEventListener("submit", async (e) => {
     let msg = "";
     if (!(from >= 1)) { msg = "시작 등수를 1 이상으로 적어 주세요"; fromIn.classList.add("input-err"); }
     else if (!(to >= from)) { msg = "끝 등수는 시작 등수보다 같거나 커야 해요"; toIn.classList.add("input-err"); }
+    else if (to > MAX_PRIZE_RANK) { msg = `등수는 ${MAX_PRIZE_RANK}등까지 정할 수 있어요 (학생은 ${MAX_PRIZE_RANK}명까지)`; toIn.classList.add("input-err"); }
     else if (!text) { msg = "상품 내용을 적어 주세요 (예: 간식)"; textIn.classList.add("input-err"); }
     if (msg) {
       errBox.textContent = msg;
@@ -232,6 +233,9 @@ addSubjectRow("", 1);
 const rewardRows = document.getElementById("rewardRows");
 const addRewardBtn = document.getElementById("addRewardBtn");
 
+// 상품 등수는 학생 수(최대 30명)까지 (서버도 같은 기준으로 막는다)
+const MAX_PRIZE_RANK = 30;
+
 function addRewardRow() {
   const row = document.createElement("div");
   row.className = "reward-row";
@@ -239,6 +243,7 @@ function addRewardRow() {
   from.type = "number";
   from.className = "reward-from";
   from.min = 1;
+  from.max = MAX_PRIZE_RANK;
   from.title = "시작 등수";
   from.setAttribute("aria-label", "시작 등수");
   const dash = document.createElement("span");
@@ -247,6 +252,7 @@ function addRewardRow() {
   to.type = "number";
   to.className = "reward-to";
   to.min = 1;
+  to.max = MAX_PRIZE_RANK;
   to.title = "끝 등수";
   to.setAttribute("aria-label", "끝 등수");
   const text = document.createElement("input");
