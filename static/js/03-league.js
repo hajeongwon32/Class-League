@@ -350,8 +350,11 @@ async function startDemo(btn) {
   showLoggedIn(me.nickname || data.nickname || "나");
 }
 
+let demoState = null; // 마지막으로 받은 체험 안내 (체험 끝내기 확인 창 문구에 쓴다)
+
 function renderDemoBar(data) {
   const demo = data && data.demo;
+  demoState = demo || null;
   demoBar.classList.toggle("hidden", !demo);
   demoFillBtn.classList.toggle("hidden", !demo || demo.as_teacher);
   if (!demo) {
@@ -387,11 +390,18 @@ demoSwitchBtn.addEventListener("click", async () => {
 });
 
 demoEndBtn.addEventListener("click", async () => {
+  // 로그인 없이 만든 임시 계정은 다시 로그인할 수 없어서, 끝내면 계정도 지우고 처음 화면으로 돌아간다
+  const guest = demoState && demoState.guest;
   const yes = await askConfirm({ icon: "🎮", title: "체험을 끝낼까요?",
-    text: "체험 리그와 기록이 지워져요. 끝낸 뒤에는 진짜 리그에 들어가거나 만들 수 있어요.", ok: "체험 끝내기" });
+    text: guest
+      ? "체험 리그와 오답 노트 기록이 모두 지워지고 처음 화면으로 돌아가요. 진짜 리그는 회원가입한 뒤 시작할 수 있어요."
+      : "체험 리그와 오답 노트 기록이 모두 지워져요. 끝낸 뒤에는 진짜 리그에 들어가거나 만들 수 있어요.",
+    ok: "체험 끝내기" });
   if (!yes) return;
   const { ok, data } = await postJSON("/demo/end", {}, demoEndBtn);
-  if (ok) showLoggedIn(data.nickname);
+  if (!ok) return;
+  if (data.logged_out) showLoggedOut();
+  else showLoggedIn(data.nickname);
 });
 
 // 문제 만들기 화면: 예시 문제를 임시 저장한 뒤 다시 열어 칸을 채운다 ([완성]은 직접 누른다)
